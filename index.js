@@ -6,19 +6,34 @@ const sum = array => array.reduce((accumulator, currentValue) => accumulator + c
 
 const round = float => Number(float.toFixed(2));
 
-const metricsFilename = './metrics.csv';
+const metricsFilename = './metrics2.csv';
 
 const metricsInput = fs.readFileSync(metricsFilename, 'utf8');
 
 const metricsData = parse(metricsInput, {
   columns: true,
   skip_empty_lines: true,
-}).map(({ id, Collectives, Expenses, CrowdfundingUSD }) => ({
-  id: Number(id),
-  Collectives: Number(Collectives),
-  Expenses: Number(Expenses),
-  CrowdfundingUSD: String(CrowdfundingUSD).length ? Number(String(CrowdfundingUSD).replace(/[$,]/g, '')) : 0,
-}));
+}).map(
+  ({
+    id,
+    slug,
+    totalCollectives,
+    totalActiveCollectives,
+    totalExpenses,
+    totalRaisedCrowdfundingUSD,
+    totalPlatformTips,
+  }) => ({
+    id: Number(id),
+    slug: slug,
+    totalCollectives: Number(totalCollectives),
+    totalActiveCollectives: Number(totalActiveCollectives),
+    totalExpenses: Number(totalExpenses),
+    totalRaisedCrowdfundingUSD: String(totalRaisedCrowdfundingUSD).length
+      ? Number(String(totalRaisedCrowdfundingUSD).replace(/[$,]/g, ''))
+      : 0,
+    totalPlatformTips: String(totalPlatformTips).length ? Number(String(totalPlatformTips).replace(/[$,]/g, '')) : 0,
+  }),
+);
 
 const plans = {
   base: { basePrice: 0, collectives: 1, expenses: 5, perCollective: 19.99, perExpense: 2.99 },
@@ -34,11 +49,12 @@ const plans = {
 
 const calculatePlan = (metricsEntry, planData) => {
   let price = planData.basePrice;
-  if (metricsEntry.Collectives > planData.collectives) {
-    price += (metricsEntry.Collectives - planData.collectives) * planData.perCollective;
+
+  if (metricsEntry.totalCollectives > planData.collectives) {
+    price += (metricsEntry.totalCollectives - planData.collectives) * planData.perCollective;
   }
-  if (Math.ceil(metricsEntry.Expenses / 12) > planData.expenses) {
-    price += (Math.ceil(metricsEntry.Expenses / 12) - planData.expenses) * planData.perExpense;
+  if (Math.ceil(metricsEntry.totalExpenses / 12) > planData.expenses) {
+    price += (Math.ceil(metricsEntry.totalExpenses / 12) - planData.expenses) * planData.perExpense;
   }
 
   return Number(price.toFixed(2));
@@ -50,15 +66,29 @@ const augmentedMetrics = metricsData.map(metricsEntry => {
   );
   const bestPricing = Math.min(...Object.values(computedPricing));
   const bestPlan = Object.keys(computedPricing).find(key => computedPricing[key] === bestPricing);
+  const totalPlatformTipsOrCrowdfunding = Number(
+    (metricsEntry.id == 11004
+      ? (5 * (metricsEntry.totalRaisedCrowdfundingUSD / 12)) / 100
+      : metricsEntry.totalPlatformTips / 12
+    ).toFixed(2),
+  );
   return {
     ...metricsEntry,
     pricing: computedPricing,
     bestPlan,
     bestPricing,
-    totalPricing: Number((bestPricing + (5 * (metricsEntry.CrowdfundingUSD / 12)) / 100).toFixed(2)),
+    totalPlatformTipsOrCrowdfunding,
+    totalPricing: Number((bestPricing + totalPlatformTipsOrCrowdfunding).toFixed(2)),
   };
 });
 
 console.log('Top 10 Customers', augmentedMetrics.sort((a, b) => b.bestPricing - a.bestPricing).slice(0, 10));
 
-console.log('Total Revenue', round(sum(augmentedMetrics.map(m => m.totalPricing))));
+console.log('Total Projected Maximum Revenue Monthly', round(sum(augmentedMetrics.map(m => m.totalPricing))));
+
+console.log('Total Projected Maximum Revenue Yearly', round(12 * sum(augmentedMetrics.map(m => m.totalPricing))));
+
+console.log(
+  'Total Current Projected Revenue for reference',
+  round(12 * sum(augmentedMetrics.map(m => m.totalPlatformTipsOrCrowdfunding))),
+);
