@@ -9,7 +9,10 @@
     "lint": "next lint",
     "fetch-data": "tsx scripts/fetch-data.ts",
     "create-sample-data": "tsx scripts/create-sample-data.ts",
-    "prebuild": "npm run fetch-data || npm run create-sample-data"
+    "setup-for-vercel": "tsx scripts/setup-for-vercel.ts",
+    "generate-db-types": "tsx scripts/setup-for-vercel.ts",
+    "copy-db-types": "tsx scripts/copy-db-types.ts",
+    "prebuild": "npm run generate-db-types && npm run copy-db-types && (npm run fetch-data || npm run create-sample-data)"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.2",

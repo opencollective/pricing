@@ -1,0 +1,13 @@
+{
+  "dialect": "postgres",
+  "camelCase": false,
+  "outDir": "./app/lib",
+  "filename": "db.d.ts",
+  "exclude": [
+    "^pg_.*",
+    "^spatial_ref_sys$",
+    "^geography_columns$",
+    "^geometry_columns$",
+    "^raster_.*"
+  ]
+}

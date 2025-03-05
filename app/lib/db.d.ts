@@ -102,7 +102,7 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface AccountingCategories {
-  appliesTo: Generated<EnumAccountingcategoriesAppliesto>;
+  appliesTo: EnumAccountingcategoriesAppliesto | null;
   code: string;
   CollectiveId: number | null;
   createdAt: Timestamp;
