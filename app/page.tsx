@@ -7,7 +7,6 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       <PricingSection />
-      <FinancialOutcome />
     </main>
   );
 }

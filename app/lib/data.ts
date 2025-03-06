@@ -19,6 +19,7 @@ export type Host = {
   totalActiveCollectives: number;
   // totalExpenses: number;
   monthlyExpenses: { month: string; count: number }[];
+  monthlyActiveCollectives: { month: string; count: number }[];
   totalRaisedUSD: number;
   totalRaisedCrowdfundingUSD: number;
   totalDisbursedUSD: number;
@@ -116,6 +117,9 @@ export async function fetchDataFromDatabase() {
 
   try {
     console.log("Fetching data directly from PostgreSQL...");
+
+    // Start timing the query execution
+    const startTime = performance.now();
 
     // Calculate date ranges for time-based metrics
     const now = new Date();
@@ -250,30 +254,20 @@ export async function fetchDataFromDatabase() {
 
       SELECT h."id", h."slug", h."name", h."type",
 
-        COALESCE((
-          SELECT COUNT(c."id")::INTEGER
-          FROM "Collectives" c
-          WHERE c."HostCollectiveId" = h."id"
-            AND c."approvedAt" IS NOT NULL
-            AND c."deletedAt" IS NULL
-            AND c."ParentCollectiveId" IS NULL
-            AND c."HostCollectiveId" != c."id"
-        ), 0) AS "totalCollectives",
-
-        COALESCE((
-          SELECT COUNT(DISTINCT c."id")::INTEGER
-          FROM "Collectives" c
-          INNER JOIN "Transactions" t ON t."CollectiveId" = c."id" 
-            AND t."deletedAt" IS NOT NULL
-            AND t."createdAt" > '2024-01-01'
-            AND t."createdAt" < '2025-01-01'
-          WHERE c."HostCollectiveId" = h."id"
-            AND c."approvedAt" IS NOT NULL
-            AND c."deletedAt" IS NULL
-            AND c."ParentCollectiveId" IS NULL
-            AND c."HostCollectiveId" != c."id"
-          GROUP BY c."HostCollectiveId"
-        ), 0) AS "totalActiveCollectives",
+        -- COALESCE((
+        --   SELECT COUNT(DISTINCT c."id")::INTEGER
+        --   FROM "Collectives" c
+        --   INNER JOIN "Transactions" t ON t."CollectiveId" = c."id" 
+        --     AND t."deletedAt" IS NOT NULL
+        --     AND t."createdAt" > '2024-01-01'
+        --     AND t."createdAt" < '2025-01-01'
+        --   WHERE c."HostCollectiveId" = h."id"
+        --     AND c."approvedAt" IS NOT NULL
+        --     AND c."deletedAt" IS NULL
+        --     AND c."ParentCollectiveId" IS NULL
+        --     AND c."HostCollectiveId" != c."id"
+        --   GROUP BY c."HostCollectiveId"
+        -- ), 0) AS "totalActiveCollectives",
 
         -- COALESCE((
         --   SELECT COUNT(e."id")::INTEGER
@@ -286,6 +280,37 @@ export async function fetchDataFromDatabase() {
         --   AND e."deletedAt" IS NULL
         --   AND e."HostCollectiveId" = h."id"
         -- ), 0) AS "totalExpenses",
+
+        (
+          SELECT json_agg(
+            json_build_object(
+              'month', monthly_data.month_label,
+              'count', monthly_data.active_collectives_count
+            )
+          )
+          FROM (
+            ${sql.join(
+              monthDates.map(
+                ({ monthLabel, startDate, endDate }) => sql`
+                  SELECT 
+                    ${sql.raw(`'${monthLabel}'`)} AS month_label,
+                    COALESCE(COUNT(DISTINCT c."id")::INTEGER, 0) AS active_collectives_count
+                  FROM "Collectives" c
+                  INNER JOIN "Transactions" t ON t."CollectiveId" = c."id" 
+                    AND t."deletedAt" IS NULL
+                    AND t."createdAt" >= ${startDate}
+                    AND t."createdAt" <= ${endDate}
+                  WHERE c."HostCollectiveId" = h."id"
+                    AND c."approvedAt" IS NOT NULL
+                    AND c."deletedAt" IS NULL
+                    AND c."ParentCollectiveId" IS NULL
+                    AND c."HostCollectiveId" != c."id"
+                `
+              ),
+              sql` UNION ALL `
+            )}
+          ) AS monthly_data
+        ) AS "monthlyActiveCollectives",
 
         (
           SELECT json_agg(
@@ -370,6 +395,12 @@ export async function fetchDataFromDatabase() {
       FROM "Hosts" h`;
 
     const { rows } = await rawQuery.execute(db);
+
+    // Calculate and log the query execution time
+    const endTime = performance.now();
+    const executionTimeInSeconds = ((endTime - startTime) / 1000).toFixed(2);
+    console.log(`Query executed in ${executionTimeInSeconds} seconds`);
+
     console.log(rows);
 
     return rows;

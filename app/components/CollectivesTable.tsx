@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   ColumnDef,
   SortingState,
+  PaginationState,
   flexRender,
 } from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   calculateBestTier,
   formatCurrency,
@@ -27,14 +28,15 @@ import {
 import { Host } from "../lib/data";
 
 interface CollectivesTableProps {
-  data: Host[]; // Use the Collective type
+  data: Host[];
 }
 
 export function CollectivesTable({ data }: CollectivesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
-
-  // Container references for virtualization
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   // Calculate summary statistics
   const summary = useMemo(() => {
@@ -51,12 +53,12 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
     });
 
     data.forEach((collective) => {
-      const { tier, monthlyCost } = calculateBestTier(collective);
-      totalIncome += monthlyCost;
+      const { tier, yearlyCost } = calculateBestTier(collective);
+      totalIncome += yearlyCost;
 
       // Count by tier title
       tierCounts[tier.title]++;
-      tierContributions[tier.title] += monthlyCost;
+      tierContributions[tier.title] += yearlyCost;
     });
 
     return {
@@ -88,57 +90,53 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         size: 200, // Fixed width in pixels
       },
       {
-        accessorKey: "paidExpensesCount",
-        header: "Total Expenses",
-        cell: (info) => info.getValue() || "0",
-        size: 150, // Fixed width in pixels
-      },
-      {
-        accessorKey: "expensesPaidPastMonth",
+        id: "expensesPastMonth",
         header: "Expenses (Past Month)",
-        cell: (info) => info.getValue() || "0",
+        accessorFn: (row) => {
+          // Get the most recent month's data
+          const latestMonth = row.monthlyExpenses?.length
+            ? row.monthlyExpenses[row.monthlyExpenses.length - 1]
+            : null;
+          return latestMonth?.count || 0;
+        },
+        cell: (info) => (info.getValue() as number).toString(),
         size: 180, // Fixed width in pixels
       },
       {
-        accessorKey: "expensesPaidPastYear",
+        id: "expensesPastYear",
         header: "Expenses (Past Year)",
-        cell: (info) => info.getValue() || "0",
+        accessorFn: (row) => {
+          const totalExpenses =
+            row.monthlyExpenses?.reduce((sum, month) => sum + month.count, 0) ||
+            0;
+          return totalExpenses;
+        },
+        cell: (info) => (info.getValue() as number).toString(),
         size: 180, // Fixed width in pixels
       },
       {
-        accessorKey: "numberOfCollectives",
+        id: "hostedCollectives",
         header: "Hosted Collectives",
-        cell: (info) => info.getValue() || "0",
+        accessorFn: (row) => {
+          // Get the most recent month's data for active collectives
+          const latestMonth = row.monthlyActiveCollectives?.length
+            ? row.monthlyActiveCollectives[
+                row.monthlyActiveCollectives.length - 1
+              ]
+            : null;
+          return latestMonth?.count || 0;
+        },
+        cell: (info) => (info.getValue() as number).toString(),
         size: 180, // Fixed width in pixels
       },
       {
-        accessorKey: "totalCrowdfundingPastMonth",
-        header: "Funding (Past Month)",
+        accessorKey: "totalRaisedCrowdfundingUSD",
+        header: "Total crowdfunding (Past Year)",
         cell: (info) => {
           const value = info.getValue() as number;
-          const currency = info.row.original.currency;
-          return formatCurrency(value, currency);
+          return formatCurrency(value);
         },
         size: 180, // Fixed width in pixels
-      },
-      {
-        accessorKey: "totalCrowdfundingPastYear",
-        header: "Funding (Past Year)",
-        cell: (info) => {
-          const value = info.getValue() as number;
-          const currency = info.row.original.currency;
-          return formatCurrency(value, currency);
-        },
-        size: 180, // Fixed width in pixels
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Created",
-        cell: (info) => {
-          const date = new Date(info.getValue() as string);
-          return date.toLocaleDateString();
-        },
-        size: 150, // Fixed width in pixels
       },
       {
         id: "bestTier",
@@ -151,15 +149,15 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         size: 180, // Fixed width in pixels
       },
       {
-        id: "monthlyCost",
-        header: "Monthly Cost",
+        id: "yearlyCost",
+        header: "Yearly Cost",
         accessorFn: (row) => {
-          const { monthlyCost } = calculateBestTier(row);
-          return monthlyCost;
+          const { yearlyCost } = calculateBestTier(row);
+          return yearlyCost;
         },
         cell: (info) => {
-          const monthlyCost = info.getValue() as number;
-          return formatCurrency(monthlyCost, info.row.original.currency);
+          const yearlyCost = info.getValue() as number;
+          return formatCurrency(yearlyCost);
         },
         size: 180, // Fixed width in pixels
       },
@@ -167,178 +165,196 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
     []
   );
 
-  // Create table instance - remove pagination model
+  // Create table instance with pagination
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
+      pagination,
     },
     onSortingChange: setSorting,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
   });
 
-  // Set up virtualization
-  const { rows } = table.getRowModel();
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 53, // Approximate height of each row in pixels
-    overscan: 10, // Number of items to render outside of the visible area
-  });
-
-  const virtualRows = rowVirtualizer.getVirtualItems();
-  const totalSize = rowVirtualizer.getTotalSize();
-  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start || 0 : 0;
-  const paddingBottom =
-    virtualRows.length > 0
-      ? totalSize - (virtualRows[virtualRows.length - 1].end || 0)
-      : 0;
-
   return (
-    <div className="w-full h-screen flex flex-col relative">
-      {/* Table takes full height */}
-      <div
-        ref={tableContainerRef}
-        className="overflow-auto h-screen flex-grow border rounded-lg"
-      >
-        <Table className="w-full divide-y divide-gray-200 border-collapse table-fixed">
-          <TableHeader className="sticky top-0 z-10 bg-gray-50">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
-                    onClick={header.column.getToggleSortingHandler()}
-                    style={{
-                      width: header.getSize(),
-                    }}
-                  >
-                    <div className="flex items-center">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {{
-                        asc: <span className="ml-1">↑</span>,
-                        desc: <span className="ml-1">↓</span>,
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="bg-white divide-y divide-gray-200 relative">
-            {paddingTop > 0 && (
-              <TableRow>
-                <TableCell
-                  style={{ height: `${paddingTop}px` }}
-                  colSpan={columns.length}
-                />
-              </TableRow>
-            )}
-            {virtualRows.map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 overflow-hidden text-ellipsis"
-                      >
+    <div className="w-full space-y-6 py-6">
+      {/* Main Table Card */}
+      <div className="py-6 ">
+        <h2 className="text-xl font-semibold mb-4 px-6">Hosts</h2>
+        <div className="overflow-x-auto border-t border-b">
+          <Table className="w-full divide-y divide-gray-200">
+            <TableHeader className="bg-gray-50">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
+                      onClick={header.column.getToggleSortingHandler()}
+                      style={{
+                        width: header.getSize(),
+                      }}
+                    >
+                      <div className="flex items-center">
                         {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                          header.column.columnDef.header,
+                          header.getContext()
                         )}
-                      </TableCell>
-                    );
-                  })}
+                        {{
+                          asc: <span className="ml-1">↑</span>,
+                          desc: <span className="ml-1">↓</span>,
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </div>
+                    </TableHead>
+                  ))}
                 </TableRow>
-              );
-            })}
-            {paddingBottom > 0 && (
-              <TableRow>
-                <TableCell
-                  style={{ height: `${paddingBottom}px` }}
-                  colSpan={columns.length}
-                />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody className="bg-white divide-y divide-gray-200">
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 overflow-hidden text-ellipsis"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="px-6 flex items-center justify-between mt-4 px-2">
+          <div className="flex items-center gap-2">
+            <button
+              className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {"<<"}
+            </button>
+            <button
+              className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {"<"}
+            </button>
+            <button
+              className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {">"}
+            </button>
+            <button
+              className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              {">>"}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">
+              Page{" "}
+              <strong>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </strong>
+            </span>
+            <select
+              className="border rounded px-2 py-1"
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value));
+              }}
+            >
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
-      {/* Floating Summary at bottom */}
-      <div className="absolute bottom-4 left-4 right-4 z-20 bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <h3 className="text-lg font-semibold mb-3">Summary</h3>
-          <div className="flex flex-wrap gap-6">
-            <div className="flex-1 min-w-[400px]">
-              <div className="overflow-x-auto">
-                <Table className="min-w-full divide-y divide-gray-200">
-                  <TableHeader className="bg-gray-50">
-                    <TableRow>
-                      <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        Tier
-                      </TableHead>
-                      <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                        Collectives
-                      </TableHead>
-                      <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                        Revenue
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="bg-white divide-y divide-gray-100">
-                    {tiers.map((tier) => (
-                      <TableRow
-                        key={tier.title}
-                        className={
-                          summary.tierCounts[tier.title] === 0
-                            ? "text-gray-400"
-                            : ""
-                        }
-                      >
-                        <TableCell className="px-3 py-2 text-sm font-medium">
-                          {tier.title}
-                        </TableCell>
-                        <TableCell className="px-3 py-2 text-sm text-right">
-                          {summary.tierCounts[tier.title]}
-                        </TableCell>
-                        <TableCell className="px-3 py-2 text-sm text-right">
-                          {formatCurrency(
-                            summary.tierContributions[tier.title] || 0,
-                            summary.currency
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                  <TableFooter className="bg-gray-50">
-                    <TableRow>
+      {/* Summary Card */}
+      <div className="bg-white px-6 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3">Summary</h3>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex-1 min-w-[400px]">
+            <div className="overflow-x-auto">
+              <Table className="min-w-full divide-y divide-gray-200">
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Tier
+                    </TableHead>
+                    <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                      Number of hosts
+                    </TableHead>
+                    <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                      Revenue
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="bg-white divide-y divide-gray-100">
+                  {tiers.map((tier) => (
+                    <TableRow
+                      key={tier.title}
+                      className={
+                        summary.tierCounts[tier.title] === 0
+                          ? "text-gray-400"
+                          : ""
+                      }
+                    >
                       <TableCell className="px-3 py-2 text-sm font-medium">
-                        Total
+                        {tier.title}
                       </TableCell>
-                      <TableCell className="px-3 py-2 text-sm font-medium text-right">
-                        {Object.values(summary.tierCounts).reduce(
-                          (sum, count) => sum + count,
-                          0
+                      <TableCell className="px-3 py-2 text-sm text-right">
+                        {summary.tierCounts[tier.title]}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm text-right">
+                        {formatCurrency(
+                          summary.tierContributions[tier.title] || 0,
+                          summary.currency
                         )}
                       </TableCell>
-                      <TableCell className="px-3 py-2 text-sm font-medium text-right">
-                        {formatCurrency(summary.totalIncome, summary.currency)}
-                      </TableCell>
                     </TableRow>
-                  </TableFooter>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+                <TableFooter className="bg-gray-50">
+                  <TableRow>
+                    <TableCell className="px-3 py-2 text-sm font-medium">
+                      Total
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium text-right">
+                      {Object.values(summary.tierCounts).reduce(
+                        (sum, count) => sum + count,
+                        0
+                      )}
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium text-right">
+                      {formatCurrency(summary.totalIncome, summary.currency)}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
             </div>
           </div>
         </div>
