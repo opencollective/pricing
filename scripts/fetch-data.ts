@@ -4,10 +4,9 @@
 import { config as dotenvConfig } from "dotenv";
 import path from "path";
 import fs from "fs";
-import { DB } from "kysely-codegen";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
-import { fetchDataFromDatabase } from "@/app/lib/data";
+import { fetchDataFromDatabase, Host } from "@/app/lib/data";
 
 // Try to load from .env.local first, then fall back to .env
 dotenvConfig({ path: path.resolve(process.cwd(), ".env.local") });
@@ -56,7 +55,7 @@ function createDbConnection() {
 
   // Set up database connection
   try {
-    return new Kysely<DB>({
+    return new Kysely<Host>({
       dialect: new PostgresDialect({
         pool: new Pool({
           connectionString: dbUrl,

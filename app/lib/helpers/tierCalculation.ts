@@ -1,22 +1,16 @@
 import { tiers } from "../tiers";
 import { Tier } from "../types/Tier";
-import { Collective } from "../../components/CollectivesTable";
+import { Host } from "../data";
 
 /**
  * Calculate the best tier for a collective based on its usage metrics
- * @param collective The collective to calculate the best tier for
+ * @param host The collective to calculate the best tier for
  * @returns An object containing the best tier and the monthly cost
  */
 export const calculateBestTier = (
-  collective: Collective
+  host: Host
 ): { tier: Tier; monthlyCost: number } => {
   // Extract relevant values from collective
-  const numHostedCollectives =
-    parseInt(String(collective.numberOfCollectives)) || 0;
-  const monthlyExpenses =
-    parseInt(String(collective.expensesPaidPastMonth)) || 0;
-  const monthlyCrowdfunding =
-    parseInt(String(collective.totalCrowdfundingPastMonth)) || 0;
 
   // Calculate costs for each tier
   const tierCosts = tiers.map((tier) => {
@@ -26,19 +20,21 @@ export const calculateBestTier = (
     // Additional collectives cost
     const additionalCollectives = Math.max(
       0,
-      numHostedCollectives - tier.includedCollectives
+      host.totalActiveCollectives - tier.includedCollectives
     );
     cost += additionalCollectives * tier.pricePerAdditionalCollective;
 
     // Additional expenses cost
+    // TODO: include expenses past month
     const additionalExpenses = Math.max(
       0,
-      monthlyExpenses - tier.includedExpensesPerMonth
+      host.totalExpenses - tier.includedExpensesPerMonth
     );
     cost += additionalExpenses * tier.pricePerAdditionalExpense;
 
     // Crowdfunding fee
-    cost += monthlyCrowdfunding * tier.crowdfundingFee;
+    // TODO: include crowdfundingUSD past month
+    cost += host.totalRaisedCrowdfundingUSD * tier.crowdfundingFee;
 
     return { tier, monthlyCost: cost };
   });

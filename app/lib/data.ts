@@ -1,7 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 
-import { DB } from "kysely-codegen";
-import { Kysely, PostgresDialect } from "kysely";
+import { Kysely, PostgresDialect, sql } from "kysely";
 import { Pool } from "pg";
 import fs from "fs";
 import path from "path";
@@ -9,6 +8,22 @@ import path from "path";
 dotenvConfig({ path: path.resolve(process.cwd(), ".env.local") });
 dotenvConfig({ path: path.resolve(process.cwd(), ".env") });
 // Note: We use ES module imports throughout the codebase for consistency.
+
+// Define types manually instead of using kysely-codegen
+export type Host = {
+  id: number;
+  slug: string;
+  name: string;
+  type: "USER" | "ORGANIZATION" | "COLLECTIVE";
+  totalCollectives: number;
+  totalActiveCollectives: number;
+  // totalExpenses: number;
+  monthlyExpenses: { month: string; count: number }[];
+  totalRaisedUSD: number;
+  totalRaisedCrowdfundingUSD: number;
+  totalDisbursedUSD: number;
+  totalPlatformTips: number;
+};
 
 // Helper function to check if DATABASE_URL is valid
 function validateDatabaseUrl(url: string | undefined): string | null {
@@ -43,7 +58,7 @@ function createDbConnection() {
 
   // Set up database connection
   try {
-    return new Kysely<DB>({
+    return new Kysely<Host>({
       dialect: new PostgresDialect({
         pool: new Pool({
           connectionString: dbUrl,
@@ -107,11 +122,6 @@ export async function fetchDataFromDatabase() {
 
     // Previous calendar month (start and end dates)
     const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-    const prevMonthStart = new Date(
-      prevMonthEnd.getFullYear(),
-      prevMonthEnd.getMonth(),
-      1
-    );
 
     // Past 12 calendar months (excluding current month)
     const pastYearEnd = prevMonthEnd;
@@ -121,153 +131,246 @@ export async function fetchDataFromDatabase() {
       1
     );
 
-    // Original database query with additional metrics
-    const rows = await db
-      .selectFrom("Collectives" as keyof DB)
-      .where("isHostAccount", "=", true)
-      .where("deletedAt", "is", null)
-      // Left join for paid expenses count (total)
-      .leftJoin(
-        db
-          .selectFrom("Expenses" as keyof DB)
-          .select([
-            "CollectiveId",
-            db.fn.count<string>("id").as("paidExpensesCount"),
-          ])
-          .where("status", "=", "PAID")
-          .groupBy("CollectiveId")
-          .as("paidExpenses"),
-        "Collectives.id",
-        "paidExpenses.CollectiveId"
-      )
-      // Left join for paid expenses in previous month
-      .leftJoin(
-        db
-          .selectFrom("Expenses" as keyof DB)
-          .select([
-            "CollectiveId",
-            db.fn.count<string>("id").as("expensesPaidPastMonth"),
-          ])
-          .where("status", "=", "PAID")
-          .where("updatedAt", ">=", prevMonthStart)
-          .where("updatedAt", "<=", prevMonthEnd)
-          .groupBy("CollectiveId")
-          .as("paidExpensesPastMonth"),
-        "Collectives.id",
-        "paidExpensesPastMonth.CollectiveId"
-      )
-      // Left join for paid expenses in past year (excluding current month)
-      .leftJoin(
-        db
-          .selectFrom("Expenses" as keyof DB)
-          .select([
-            "CollectiveId",
-            db.fn.count<string>("id").as("expensesPaidPastYear"),
-          ])
-          .where("status", "=", "PAID")
-          .where("updatedAt", ">=", pastYearStart)
-          .where("updatedAt", "<=", pastYearEnd)
-          .groupBy("CollectiveId")
-          .as("paidExpensesPastYear"),
-        "Collectives.id",
-        "paidExpensesPastYear.CollectiveId"
-      )
-      // Left join for incoming transactions in previous month
-      .leftJoin(
-        db
-          .selectFrom("Transactions" as keyof DB)
-          .select([
-            "CollectiveId",
-            db.fn.sum<string>("amount").as("totalCrowdfundingPastMonth"),
-          ])
-          .where("type", "=", "CREDIT")
-          .where("createdAt", ">=", prevMonthStart)
-          .where("createdAt", "<=", prevMonthEnd)
-          .groupBy("CollectiveId")
-          .as("crowdfundingPastMonth"),
-        "Collectives.id",
-        "crowdfundingPastMonth.CollectiveId"
-      )
-      // Left join for incoming transactions in past year (excluding current month)
-      .leftJoin(
-        db
-          .selectFrom("Transactions" as keyof DB)
-          .select([
-            "CollectiveId",
-            db.fn.sum<string>("amount").as("totalCrowdfundingPastYear"),
-          ])
-          .where("type", "=", "CREDIT")
-          .where("createdAt", ">=", pastYearStart)
-          .where("createdAt", "<=", pastYearEnd)
-          .groupBy("CollectiveId")
-          .as("crowdfundingPastYear"),
-        "Collectives.id",
-        "crowdfundingPastYear.CollectiveId"
-      )
-      // Left join for count of active hosted collectives
-      .leftJoin(
-        db
-          .selectFrom("Collectives as HostedCollectives" as keyof DB)
-          .select([
-            "HostCollectiveId",
-            db.fn.count<string>("id").as("numberOfCollectives"),
-          ])
-          .where("isActive", "=", true)
-          .where("HostCollectiveId", "is not", null) // Fix for whereNotNull
-          .groupBy("HostCollectiveId")
-          .as("hostedCollectives"),
-        "Collectives.id",
-        "hostedCollectives.HostCollectiveId"
-      )
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .select((eb: any) => [
-        "Collectives.id",
-        "Collectives.name",
-        "Collectives.slug",
-        "Collectives.description",
-        "Collectives.image",
-        "Collectives.currency",
-        "Collectives.createdAt",
-        "Collectives.updatedAt",
-        // Add more columns as needed from Collectives
-        eb.fn
-          .coalesce(eb.ref("paidExpenses.paidExpensesCount"), eb.val("0"))
-          .as("paidExpensesCount"),
-        // New metrics
-        eb.fn
-          .coalesce(
-            eb.ref("paidExpensesPastMonth.expensesPaidPastMonth"),
-            eb.val("0")
-          )
-          .as("expensesPaidPastMonth"),
-        eb.fn
-          .coalesce(
-            eb.ref("paidExpensesPastYear.expensesPaidPastYear"),
-            eb.val("0")
-          )
-          .as("expensesPaidPastYear"),
-        eb.fn
-          .coalesce(
-            eb.ref("hostedCollectives.numberOfCollectives"),
-            eb.val("0")
-          )
-          .as("numberOfCollectives"),
-        eb.fn
-          .coalesce(
-            eb.ref("crowdfundingPastMonth.totalCrowdfundingPastMonth"),
-            eb.val("0")
-          )
-          .as("totalCrowdfundingPastMonth"),
-        eb.fn
-          .coalesce(
-            eb.ref("crowdfundingPastYear.totalCrowdfundingPastYear"),
-            eb.val("0")
-          )
-          .as("totalCrowdfundingPastYear"),
-      ])
-      .execute();
+    // Generate dates for the past 12 months to use in our query
+    const monthDates = [];
+    for (let i = 0; i < 12; i++) {
+      const monthDate = new Date(pastYearEnd);
+      monthDate.setMonth(pastYearEnd.getMonth() - i);
 
-    console.log(`Retrieved ${rows.length} items from database`);
+      const startOfMonth = new Date(
+        monthDate.getFullYear(),
+        monthDate.getMonth(),
+        1
+      );
+      const endOfMonth = new Date(
+        monthDate.getFullYear(),
+        monthDate.getMonth() + 1,
+        0
+      );
+
+      monthDates.push({
+        monthLabel: startOfMonth.toISOString().substring(0, 7), // YYYY-MM format
+        startDate: startOfMonth.toISOString().split("T")[0], // YYYY-MM-DD format
+        endDate: endOfMonth.toISOString().split("T")[0], // YYYY-MM-DD format
+      });
+    }
+
+    const rawQuery = sql<Host>`
+      WITH "Hosts" AS (
+        SELECT c.* 
+        FROM "Collectives" c
+        INNER JOIN "Transactions" t ON t."HostCollectiveId" = c."id"
+        WHERE c."isHostAccount" IS TRUE 
+          AND t."deletedAt" IS NULL
+          AND t."createdAt" > '2024-01-01'
+          AND c."deletedAt" IS NULL
+          AND c."id" NOT IN (969, 9804, 11049)
+        GROUP BY c."id"
+      ),
+
+      "AmountRaised" AS (
+        SELECT h."id", COALESCE(SUM(t1."amountInHostCurrency"), 0) AS "totalRaised", 
+              t1."hostCurrency" AS "totalRaisedCurrency"
+        FROM "Transactions" t1
+        LEFT JOIN "Transactions" t2 
+          ON t2."type" = 'DEBIT' 
+          AND t2."kind" = t1."kind" 
+          AND t1."TransactionGroup" = t2."TransactionGroup" 
+          AND t2."deletedAt" IS NULL
+        INNER JOIN "Hosts" h ON h."id" = t1."HostCollectiveId"
+        WHERE t1."type" = 'CREDIT' 
+          AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
+          AND t1."deletedAt" IS NULL
+          AND t1."RefundTransactionId" IS NULL
+          AND t1."createdAt" > '2024-01-01'
+          AND t1."createdAt" < '2025-01-01'
+          AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
+        GROUP BY h."id", t1."hostCurrency"
+      ),
+
+      "AmountRaisedCrowdfunding" AS (
+        SELECT h."id", COALESCE(SUM(t1."amountInHostCurrency"), 0) AS "totalRaised", 
+              t1."hostCurrency" AS "totalRaisedCurrency"
+        FROM "Transactions" t1
+        LEFT JOIN "Transactions" t2 
+          ON t2."type" = 'DEBIT' 
+          AND t2."kind" = t1."kind" 
+          AND t1."TransactionGroup" = t2."TransactionGroup" 
+          AND t2."deletedAt" IS NULL
+        INNER JOIN "Hosts" h ON h."id" = t1."HostCollectiveId"
+        LEFT JOIN "PaymentMethods" pm ON pm."id" = t1."PaymentMethodId"
+        WHERE t1."type" = 'CREDIT' 
+          AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
+          AND t1."deletedAt" IS NULL
+          AND t1."RefundTransactionId" IS NULL
+          AND t1."createdAt" > '2024-01-01'
+          AND t1."createdAt" < '2025-01-01'
+          AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
+          AND pm."service" IN ('stripe', 'paypal')
+        GROUP BY h."id", t1."hostCurrency"
+      ),
+
+      "AmountDisbursed" AS (
+        SELECT h."id", COALESCE(SUM(t1."amountInHostCurrency"), 0) AS "totalDisbursed", 
+              t1."hostCurrency" AS "totalDisbursedCurrency"
+        FROM "Transactions" t1
+        LEFT JOIN "Transactions" t2 
+          ON t2."type" = 'CREDIT' 
+          AND t2."kind" = t1."kind" 
+          AND t1."TransactionGroup" = t2."TransactionGroup" 
+          AND t2."deletedAt" IS NULL
+        INNER JOIN "Hosts" h ON h."id" = t1."HostCollectiveId"
+        WHERE t1."type" = 'DEBIT' 
+          AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
+          AND t1."deletedAt" IS NULL
+          AND t1."RefundTransactionId" IS NULL
+          AND t1."createdAt" > '2024-01-01'
+          AND t1."createdAt" < '2025-01-01'
+          AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
+        GROUP BY h."id", t1."hostCurrency"
+      ),
+
+      "PlatformTips" AS (
+        SELECT h."id", COALESCE(SUM(t."amountInHostCurrency"), 0) AS "totalPlatformTips", 
+              t."hostCurrency"
+        FROM "Transactions" t
+        LEFT JOIN "Transactions" t2 
+          ON t2."kind" = 'CONTRIBUTION'
+          AND t2."TransactionGroup" = t."TransactionGroup"
+          AND t2."deletedAt" IS NULL 
+          AND t2."type" = 'CREDIT'
+        INNER JOIN "Hosts" h ON h."id" = t2."HostCollectiveId"
+        WHERE t."kind" = 'PLATFORM_TIP'
+          AND t."type" = 'CREDIT'
+          AND t."deletedAt" IS NULL
+          AND t."createdAt" > '2024-01-01'
+          AND t."createdAt" < '2025-01-01'
+        GROUP BY h."id", t."hostCurrency"
+      )
+
+      SELECT h."id", h."slug", h."name", h."type",
+
+        COALESCE((
+          SELECT COUNT(c."id")::INTEGER
+          FROM "Collectives" c
+          WHERE c."HostCollectiveId" = h."id"
+            AND c."approvedAt" IS NOT NULL
+            AND c."deletedAt" IS NULL
+            AND c."ParentCollectiveId" IS NULL
+            AND c."HostCollectiveId" != c."id"
+        ), 0) AS "totalCollectives",
+
+        COALESCE((
+          SELECT COUNT(DISTINCT c."id")::INTEGER
+          FROM "Collectives" c
+          INNER JOIN "Transactions" t ON t."CollectiveId" = c."id" 
+            AND t."deletedAt" IS NOT NULL
+            AND t."createdAt" > '2024-01-01'
+            AND t."createdAt" < '2025-01-01'
+          WHERE c."HostCollectiveId" = h."id"
+            AND c."approvedAt" IS NOT NULL
+            AND c."deletedAt" IS NULL
+            AND c."ParentCollectiveId" IS NULL
+            AND c."HostCollectiveId" != c."id"
+          GROUP BY c."HostCollectiveId"
+        ), 0) AS "totalActiveCollectives",
+
+        -- COALESCE((
+        --   SELECT COUNT(e."id")::INTEGER
+        --   FROM "Expenses" e
+        --   INNER JOIN "Transactions" t ON t."ExpenseId" = e."id" AND t."kind" = 'EXPENSE' AND t."type" = 'DEBIT' AND t."RefundTransactionId" IS NULL AND t."deletedAt" IS NULL
+        --   WHERE e."status" = 'PAID'
+        --   AND t."createdAt" > '2024-01-01'
+        --   AND t."createdAt" < '2025-01-01'
+        --   AND t."HostCollectiveId" = h."id"
+        --   AND e."deletedAt" IS NULL
+        --   AND e."HostCollectiveId" = h."id"
+        -- ), 0) AS "totalExpenses",
+
+        (
+          SELECT json_agg(
+            json_build_object(
+              'month', monthly_data.month_label,
+              'count', monthly_data.expense_count
+            )
+          )
+          FROM (
+            ${sql.join(
+              monthDates.map(
+                ({ monthLabel, startDate, endDate }) => sql`
+                  SELECT 
+                    ${sql.raw(`'${monthLabel}'`)} AS month_label,
+                    COALESCE(COUNT(e."id")::INTEGER, 0) AS expense_count
+                  FROM "Expenses" e
+                  INNER JOIN "Transactions" t ON t."ExpenseId" = e."id" 
+                    AND t."kind" = 'EXPENSE' 
+                    AND t."type" = 'DEBIT' 
+                    AND t."RefundTransactionId" IS NULL 
+                    AND t."deletedAt" IS NULL
+                  WHERE e."status" = 'PAID'
+                    AND t."createdAt" >= ${startDate}
+                    AND t."createdAt" <= ${endDate}
+                    AND t."HostCollectiveId" = h."id"
+                    AND e."deletedAt" IS NULL
+                    AND e."HostCollectiveId" = h."id"
+                `
+              ),
+              sql` UNION ALL `
+            )}
+          ) AS monthly_data
+        ) AS "monthlyExpenses",
+
+        COALESCE((
+          SELECT ROUND(("totalRaised" * 
+            COALESCE((SELECT "rate" 
+                      FROM "CurrencyExchangeRates" 
+                      WHERE "from" = ar."totalRaisedCurrency" 
+                        AND "to" = 'USD' 
+                      ORDER BY id DESC LIMIT 1), 1)
+          )::NUMERIC, 0)::INTEGER
+          FROM "AmountRaised" ar 
+          WHERE ar."id" = h."id" 
+          ORDER BY "totalRaised" DESC LIMIT 1
+        ), 0) AS "totalRaisedUSD",
+
+        COALESCE((
+          SELECT ROUND(("totalRaised" * 
+            COALESCE((SELECT "rate" 
+                      FROM "CurrencyExchangeRates" 
+                      WHERE "from" = ar."totalRaisedCurrency" 
+                        AND "to" = 'USD' 
+                      ORDER BY id DESC LIMIT 1), 1)
+          )::NUMERIC, 0)::INTEGER
+          FROM "AmountRaisedCrowdfunding" ar 
+          WHERE ar."id" = h."id" 
+          ORDER BY "totalRaised" DESC LIMIT 1
+        ), 0) AS "totalRaisedCrowdfundingUSD",
+
+        COALESCE((
+          SELECT ROUND(("totalDisbursed" * 
+            COALESCE((SELECT "rate" 
+                      FROM "CurrencyExchangeRates" 
+                      WHERE "from" = ar."totalDisbursedCurrency" 
+                        AND "to" = 'USD' 
+                      ORDER BY id DESC LIMIT 1), 1)
+          )::NUMERIC, 0)::INTEGER
+          FROM "AmountDisbursed" ar 
+          WHERE ar."id" = h."id" 
+          ORDER BY "totalDisbursed" DESC LIMIT 1
+        ), 0) AS "totalDisbursedUSD",
+
+        COALESCE((
+          SELECT "totalPlatformTips"::INTEGER
+          FROM "PlatformTips" ar 
+          WHERE ar."id" = h."id" 
+          ORDER BY "totalPlatformTips" DESC 
+          LIMIT 1
+        ), 0) AS "totalPlatformTips"
+
+      FROM "Hosts" h`;
+
+    const { rows } = await rawQuery.execute(db);
+    console.log(rows);
 
     return rows;
   } catch (error) {

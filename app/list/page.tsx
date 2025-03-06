@@ -4,11 +4,11 @@ import { CollectivesTable, Collective } from "../components/CollectivesTable";
 
 // This table is dynamically rendered but can be statically generated
 export default async function CollectivesList() {
-  const collectives = (await fetchData()) as Collective[];
+  const hosts = await fetchData();
 
   return (
     <Suspense fallback={<div>Loading data...</div>}>
-      <CollectivesTable data={collectives} />
+      <CollectivesTable data={hosts} />
     </Suspense>
   );
 }
