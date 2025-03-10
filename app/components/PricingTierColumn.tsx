@@ -23,13 +23,13 @@ export function PricingTierColumn({
     const dollars = cents / 100;
     return dollars === 0 ? "$0" : `$${dollars.toFixed(decimals)}`;
   };
-  const popular = false;
+
   const price =
     interval === PricingInterval.MONTHLY
       ? tier.pricePerMonth
       : (tier.pricePerMonth * 10) / 12;
 
-  // Styles for highlighting the popular column
+  // Styles for highlighting the recommended column
   const headingColor = isPopular ? "text-indigo-700" : "text-gray-900";
 
   return (
@@ -44,7 +44,7 @@ export function PricingTierColumn({
         {isPopular && (
           <div className="absolute z-20 top-0 left-1/2 -translate-y-1/2 -translate-x-1/2 transform">
             <span className="inline-flex items-center rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
-              Popular
+              Recommended
             </span>
           </div>
         )}
@@ -58,7 +58,7 @@ export function PricingTierColumn({
             >
               {formatPrice(price, 0)}
             </span>
-            <span className="text-sm font-semibold text-gray-600">/month</span>
+            <span className="text-sm font-semibold text-gray-600">/mo</span>
           </div>
           <div className="mt-6">
             <a

@@ -1,18 +1,71 @@
 "use client";
 
-import React, { useState } from "react";
-import { tiers } from "../lib/tiers";
+import React, { useState, useEffect } from "react";
+import { tiers, featuresForTiers, features } from "../lib/tiers";
 import { PricingInterval, TierType } from "../lib/types/Tier";
 import { PricingTierColumn } from "./PricingTierColumn";
 import { PricingFeatureCell } from "./PricingFeatureCell";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, X, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Slider } from "@/components/ui/slider";
+
+// Function to calculate the best tier based on usage
+function calculateBestTier(expenses: number, collectives: number): string {
+  if (collectives <= 1 && expenses <= 5) {
+    return "Free";
+  } else if (collectives <= 5 && expenses <= 25) {
+    return "Basic S";
+  } else if (collectives <= 10 && expenses <= 50) {
+    return "Basic M";
+  } else if (collectives <= 25 && expenses <= 100) {
+    return "Basic L";
+  } else if (collectives <= 50 && expenses <= 150) {
+    return "Basic XL";
+  } else {
+    return "Pro";
+  }
+}
+
+// Animated table row component using Framer Motion
+function AnimatedTableRow({
+  show,
+  children,
+}: {
+  show: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.tr
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{
+            duration: 0.3,
+            ease: "easeInOut",
+          }}
+        >
+          {children}
+        </motion.tr>
+      )}
+    </AnimatePresence>
+  );
+}
 
 export function PricingSection() {
   const [interval, setInterval] = useState<PricingInterval>(
     PricingInterval.MONTHLY
   );
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
+  const [overviewOpen, setOverviewOpen] = useState(true);
+  const [featuresOpen, setFeaturesOpen] = useState(true);
+  const [expenses, setExpenses] = useState<number>(25);
+  const [collectives, setCollectives] = useState<number>(5);
+  const [recommendedPlan, setRecommendedPlan] = useState<string>(
+    calculateBestTier(25, 5)
+  );
 
   // Get the visible tiers
   const visibleTiers = tiers.filter((t) => t.type !== TierType.PRO);
@@ -21,6 +74,11 @@ export function PricingSection() {
   // const formatPercentage = (decimal: number) => {
   //   return `${(decimal * 100).toFixed(0)}%`;
   // };
+
+  // Find the recommended plan based on usage
+  useEffect(() => {
+    setRecommendedPlan(calculateBestTier(expenses, collectives));
+  }, [expenses, collectives]);
 
   return (
     <div className="py-24 sm:py-32">
@@ -40,7 +98,63 @@ export function PricingSection() {
           </p>
         </div>
 
-        <div className="mt-10 flex justify-center">
+        {/* Plan Recommender */}
+        <div className="mt-12 px-6 py-10 max-w-3xl mx-auto">
+          {/* <h3 className="text-lg font-medium text-gray-900 mb-6">
+            Find Your Ideal Plan
+          </h3> */}
+          <div className="space-y-8">
+            <div>
+              <div className="flex justify-between mb-2">
+                <label
+                  htmlFor="expenses-slider"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Monthly Expenses
+                </label>
+              </div>
+              <div className="relative pt-2 pb-8">
+                <Slider
+                  id="expenses-slider"
+                  defaultValue={[expenses]}
+                  value={[expenses]}
+                  label={"expenses"}
+                  min={1}
+                  max={200}
+                  step={5}
+                  onValueChange={(values) => setExpenses(values[0])}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-2">
+                <label
+                  htmlFor="collectives-slider"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Hosted Collectives
+                </label>
+              </div>
+              <div className="relative pt-2 pb-8">
+                <Slider
+                  id="collectives-slider"
+                  defaultValue={[collectives]}
+                  value={[collectives]}
+                  label={"collectives"}
+                  min={1}
+                  max={60}
+                  step={1}
+                  onValueChange={(values) => setCollectives(values[0])}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-center">
           <div className="relative flex items-center rounded-full p-1 bg-gray-100">
             <button
               type="button"
@@ -68,7 +182,7 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="mx-auto mt-16 max-w-6xl sm:mt-20">
+        <div className="mx-auto mt-8 max-w-6xl">
           {/* Pricing Comparison Table */}
           <div className="overflow-x-auto rounded-xl ">
             <table className="w-full border-collapse pt-2">
@@ -79,12 +193,12 @@ export function PricingSection() {
                   <th className="px-6 pt-6 pb-8"></th>
 
                   {/* Tier Headers using PricingTierColumn component */}
-                  {visibleTiers.map((tier, index) => (
+                  {visibleTiers.map((tier) => (
                     <PricingTierColumn
                       key={tier.title}
                       tier={tier}
                       interval={interval}
-                      isPopular={index === 1}
+                      isPopular={tier.title === recommendedPlan}
                       isHovered={hoveredTier === tier.title}
                       onHover={setHoveredTier}
                     />
@@ -94,40 +208,29 @@ export function PricingSection() {
 
               {/* Table Body */}
               <tbody className="divide-y divide-gray-200">
-                {/* Section Header */}
+                {/* Overview Section Header */}
                 <tr>
                   <td
                     colSpan={visibleTiers.length + 1}
-                    className="px-6 pb-4 pt-2  text-sm "
+                    className="px-6 pb-4 pt-2 text-sm"
                   >
-                    Overview
+                    <button
+                      onClick={() => setOverviewOpen(!overviewOpen)}
+                      className="flex items-center justify-between w-full"
+                    >
+                      <span className="font-medium">Overview</span>
+                      <motion.span
+                        animate={{ rotate: overviewOpen ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </motion.span>
+                    </button>
                   </td>
                 </tr>
-                {/* All features */}
-                <tr>
-                  <th
-                    scope="row"
-                    className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
-                  >
-                    All features
-                  </th>
-                  {visibleTiers.map((tier, index) => (
-                    <PricingFeatureCell
-                      key={`${tier.title}-collectives`}
-                      value={
-                        <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
-                          <Check strokeWidth={3} size={10} />
-                        </div>
-                      }
-                      isPopular={index === 1}
-                      isHovered={hoveredTier === tier.title}
-                      onHover={setHoveredTier}
-                      tier={tier}
-                    />
-                  ))}
-                </tr>
+
                 {/* Included Collectives */}
-                <tr>
+                <AnimatedTableRow show={overviewOpen}>
                   <th
                     scope="row"
                     className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
@@ -144,10 +247,10 @@ export function PricingSection() {
                       tier={tier}
                     />
                   ))}
-                </tr>
+                </AnimatedTableRow>
 
                 {/* Price per Additional Collective */}
-                <tr>
+                <AnimatedTableRow show={overviewOpen}>
                   <th
                     scope="row"
                     className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
@@ -166,10 +269,10 @@ export function PricingSection() {
                       tier={tier}
                     />
                   ))}
-                </tr>
+                </AnimatedTableRow>
 
                 {/* Included Expenses */}
-                <tr>
+                <AnimatedTableRow show={overviewOpen}>
                   <th
                     scope="row"
                     className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
@@ -186,10 +289,10 @@ export function PricingSection() {
                       tier={tier}
                     />
                   ))}
-                </tr>
+                </AnimatedTableRow>
 
                 {/* Price per Additional Expense */}
-                <tr>
+                <AnimatedTableRow show={overviewOpen}>
                   <th
                     scope="row"
                     className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
@@ -208,7 +311,60 @@ export function PricingSection() {
                       tier={tier}
                     />
                   ))}
+                </AnimatedTableRow>
+
+                {/* Features Section Header */}
+                <tr>
+                  <td
+                    colSpan={visibleTiers.length + 1}
+                    className="px-6 pb-4 pt-2 text-sm"
+                  >
+                    <button
+                      onClick={() => setFeaturesOpen(!featuresOpen)}
+                      className="flex items-center justify-between w-full"
+                    >
+                      <span className="font-medium">Features</span>
+                      <motion.span
+                        animate={{ rotate: featuresOpen ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </motion.span>
+                    </button>
+                  </td>
                 </tr>
+
+                {/* Features */}
+                {Object.values(features).map((feature) => (
+                  <AnimatedTableRow key={feature} show={featuresOpen}>
+                    <th
+                      scope="row"
+                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
+                    >
+                      {feature}
+                    </th>
+                    {visibleTiers.map((tier, index) => (
+                      <PricingFeatureCell
+                        key={`${tier.title}-${feature}`}
+                        value={
+                          featuresForTiers[tier.type][feature] ? (
+                            <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
+                              <Check strokeWidth={3} size={10} />
+                            </div>
+                          ) : (
+                            <div className="rounded-full flex justify-center items-center size-3.5 bg-gray-200 text-gray-400 justify-self-center">
+                              <X strokeWidth={3} size={10} />
+                            </div>
+                          )
+                        }
+                        tier={tier}
+                        onHover={setHoveredTier}
+                        isPopular={index === 1}
+                        isHovered={hoveredTier === tier.title}
+                      />
+                    ))}
+                  </AnimatedTableRow>
+                ))}
 
                 {/* Crowdfunding Fee */}
                 {/* <tr>

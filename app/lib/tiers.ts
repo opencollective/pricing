@@ -1,15 +1,104 @@
 import { Tier, TierType } from "./types/Tier";
 
+const features = {
+  // Basic features (all tiers)
+  ACCOUNT_MANAGEMENT: "Account management",
+  SUBMIT_REVIEW_EXPENSES: "Submit and review expenses",
+  MANUALLY_PAY_EXPENSES: "Manually pay expenses",
+  UPDATES: "Updates",
+  VENDORS: "Vendors",
+  CROWDFUNDING: "Crowdfunding",
+
+  // Paid tier features (Basic and Pro)
+  PAY_WITH_WISE: "Pay with Wise",
+  PAY_WITH_PAYPAL: "Pay with PayPal",
+  ADVANCED_PERMISSIONS: "Advanced permissions",
+  CHART_OF_ACCOUNTS: "Chart of accounts",
+  HOSTED_COLLECTIVES: "Hosted collectives",
+  ANTIFRAUD_SECURITY: "Antifraud security checks",
+  EXPECTED_FUNDS: "Expected funds",
+  CHARGE_HOSTING_FEES: "Charge hosting fees",
+  RESTRICTED_FUNDS: "Restricted funds",
+
+  // Pro tier features
+  AGREEMENTS: "Agreements",
+  TAX_FORMS: "Tax forms",
+  CONNECT_BANK_ACCOUNTS: "Connect bank accounts",
+  FUNDS_GRANTS_MANAGEMENT: "Funds & grants management",
+};
+
+const freeFeatures = [
+  features.ACCOUNT_MANAGEMENT,
+  features.SUBMIT_REVIEW_EXPENSES,
+  features.MANUALLY_PAY_EXPENSES,
+  features.UPDATES,
+  features.VENDORS,
+  features.CROWDFUNDING,
+];
+
+const basicFeatures = [
+  ...freeFeatures,
+  features.PAY_WITH_WISE,
+  features.PAY_WITH_PAYPAL,
+  features.ADVANCED_PERMISSIONS,
+  features.CHART_OF_ACCOUNTS,
+  features.HOSTED_COLLECTIVES,
+  features.ANTIFRAUD_SECURITY,
+  features.EXPECTED_FUNDS,
+  features.CHARGE_HOSTING_FEES,
+  features.RESTRICTED_FUNDS,
+];
+
+const proFeatures = [
+  ...basicFeatures,
+  features.AGREEMENTS,
+  features.TAX_FORMS,
+  features.CONNECT_BANK_ACCOUNTS,
+  features.FUNDS_GRANTS_MANAGEMENT,
+];
+
+const featuresForTiers = {
+  [TierType.FREE]: {
+    // Map all features to booleans based on whether they are included in freeFeatures
+    ...Object.fromEntries(
+      Object.values(features).map((feature) => [
+        feature,
+        freeFeatures.includes(feature),
+      ])
+    ),
+  },
+  [TierType.BASIC]: {
+    // Map all features to booleans based on whether they are included in basicFeatures
+    ...Object.fromEntries(
+      Object.values(features).map((feature) => [
+        feature,
+        basicFeatures.includes(feature),
+      ])
+    ),
+  },
+  [TierType.PRO]: {
+    // Map all features to booleans based on whether they are included in proFeatures
+    ...Object.fromEntries(
+      Object.values(features).map((feature) => [
+        feature,
+        proFeatures.includes(feature),
+      ])
+    ),
+  },
+};
+
+export { featuresForTiers, features };
+
 export const tiers: Tier[] = [
   {
     type: TierType.FREE,
     title: "Free",
     pricePerMonth: 0,
     includedCollectives: 1,
-    pricePerAdditionalCollective: 3000, // $30.00
-    includedExpensesPerMonth: 100,
-    pricePerAdditionalExpense: 50, // $0.50
-    crowdfundingFee: 0.05,
+    pricePerAdditionalCollective: 1999, // $19.99
+    includedExpensesPerMonth: 5,
+    pricePerAdditionalExpense: 299, // $2.99
+    crowdfundingFee: 0,
   },
   {
     type: TierType.BASIC,
