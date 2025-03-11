@@ -409,3 +409,23 @@ export async function fetchDataFromDatabase() {
     throw new Error("Failed to fetch data from database");
   }
 }
+
+// Function to fetch a specific collective by slug
+export async function fetchCollectiveBySlug(
+  slug: string
+): Promise<Host | null> {
+  try {
+    const data = await fetchData();
+    const collective = data.find((item) => item.slug === slug);
+
+    if (!collective) {
+      console.warn(`Collective with slug "${slug}" not found`);
+      return null;
+    }
+
+    return collective;
+  } catch (error) {
+    console.error(`Error fetching collective with slug "${slug}":`, error);
+    return null;
+  }
+}

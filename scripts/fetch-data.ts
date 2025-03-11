@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
-import { fetchDataFromDatabase, Host } from "@/app/lib/data";
+import { fetchDataFromDatabase, Host } from "@/lib/data";
 
 // Try to load from .env.local first, then fall back to .env
 dotenvConfig({ path: path.resolve(process.cwd(), ".env.local") });

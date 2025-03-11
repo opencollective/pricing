@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { fetchData } from "../lib/data";
-import { CollectivesTable } from "../components/CollectivesTable";
+import { fetchData } from "../../lib/data";
+import { CollectivesTable } from "../../components/CollectivesTable";
 
 // This table is dynamically rendered but can be statically generated
 export default async function CollectivesList() {

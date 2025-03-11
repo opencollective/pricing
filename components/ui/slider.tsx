@@ -56,7 +56,7 @@ function Slider({
           className="relative border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
         >
           {label && (
-            <p className="absolute top-5  -left-16 text-center w-32">
+            <p className="absolute top-5 text-sm font-semibold -left-16 text-center w-32">
               {value} {label}
             </p>
           )}
