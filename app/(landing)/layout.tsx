@@ -2,7 +2,7 @@
 
 import React, { useState, createContext, useContext } from "react";
 import { tiers, featuresForTiers, features } from "../../lib/tiers";
-import { PricingInterval } from "../../lib/types/Tier";
+import { PricingInterval, TierType } from "../../lib/types/Tier";
 import { PricingTierColumn } from "../../components/PricingTierColumn";
 import { PricingFeatureCell } from "../../components/PricingFeatureCell";
 import Link from "next/link";
@@ -18,6 +18,8 @@ type PlanContextType = {
   collectives: number;
   setCollectives: (value: number) => void;
   recommendedPlan: string;
+  selectedTierType: TierType;
+  setSelectedTierType: (value: TierType) => void;
 };
 
 const PlanContext = createContext<PlanContextType | null>(null);
@@ -33,6 +35,8 @@ export function usePlanContext() {
       collectives: 5,
       setCollectives: () => {},
       recommendedPlan: "Basic S",
+      selectedTierType: TierType.BASIC,
+      setSelectedTierType: () => {},
     };
   }
   return context;
@@ -76,6 +80,9 @@ export default function LandingLayout({
   const [interval, setInterval] = useState<PricingInterval>(
     PricingInterval.MONTHLY
   );
+  const [selectedTierType, setSelectedTierType] = useState<TierType>(
+    TierType.BASIC
+  );
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
   const [overviewOpen, setOverviewOpen] = useState(true);
   const [featuresOpen, setFeaturesOpen] = useState(true);
@@ -88,7 +95,7 @@ export default function LandingLayout({
   const recommendedPlan = calculateBestTier(expenses, collectives);
 
   // Get the visible tiers
-  const visibleTiers = tiers;
+  const visibleTiers = tiers.filter((tier) => tier.type === selectedTierType);
 
   // Create context value
   const contextValue = {
@@ -97,6 +104,8 @@ export default function LandingLayout({
     collectives,
     setCollectives,
     recommendedPlan,
+    selectedTierType,
+    setSelectedTierType,
   };
 
   return (
@@ -124,8 +133,7 @@ export default function LandingLayout({
           <div>
             <TierLevels />
           </div> */}
-
-          <div className="mt-6 flex justify-center">
+          <div className="mt-2 flex justify-center">
             <div className="relative flex items-center rounded-full p-1 bg-gray-100">
               <button
                 type="button"
@@ -154,6 +162,47 @@ export default function LandingLayout({
               </button>
             </div>
           </div>
+          <div className="mt-6 flex flex-col items-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Select a tier level to view available plans:
+            </p>
+            {/* Tier Type Selector */}
+            <div className="relative flex items-center rounded-full p-1 bg-gray-100 mb-4">
+              <button
+                type="button"
+                className={`${
+                  selectedTierType === TierType.FREE
+                    ? "bg-white shadow-md"
+                    : "text-gray-500"
+                } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                onClick={() => setSelectedTierType(TierType.FREE)}
+              >
+                Free
+              </button>
+              <button
+                type="button"
+                className={`${
+                  selectedTierType === TierType.BASIC
+                    ? "bg-white shadow-md"
+                    : "text-gray-500"
+                } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                onClick={() => setSelectedTierType(TierType.BASIC)}
+              >
+                Basic
+              </button>
+              <button
+                type="button"
+                className={`${
+                  selectedTierType === TierType.PRO
+                    ? "bg-white shadow-md"
+                    : "text-gray-500"
+                } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                onClick={() => setSelectedTierType(TierType.PRO)}
+              >
+                Pro
+              </button>
+            </div>
+          </div>
 
           <div className="mx-auto mt-8 max-w-6xl">
             {/* Pricing Comparison Table */}
@@ -171,7 +220,10 @@ export default function LandingLayout({
                         key={tier.title}
                         tier={tier}
                         interval={interval}
-                        isPopular={tier.title === recommendedPlan}
+                        isPopular={
+                          tier.title === recommendedPlan &&
+                          tier.type === selectedTierType
+                        }
                         isHovered={hoveredTier === tier.title}
                         onHover={setHoveredTier}
                       />
@@ -206,7 +258,7 @@ export default function LandingLayout({
                   <AnimatedTableRow show={overviewOpen}>
                     <th
                       scope="row"
-                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
+                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left w-[250px] max-w-[250px]"
                     >
                       Included Collectives
                     </th>
@@ -214,7 +266,10 @@ export default function LandingLayout({
                       <PricingFeatureCell
                         key={`${tier.title}-collectives`}
                         value={tier.includedCollectives}
-                        isPopular={tier.title === recommendedPlan}
+                        isPopular={
+                          tier.title === recommendedPlan &&
+                          tier.type === selectedTierType
+                        }
                         isHovered={hoveredTier === tier.title}
                         onHover={setHoveredTier}
                         tier={tier}
@@ -226,7 +281,7 @@ export default function LandingLayout({
                   <AnimatedTableRow show={overviewOpen}>
                     <th
                       scope="row"
-                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
+                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left w-[250px] max-w-[250px]"
                     >
                       Additional collective
                     </th>
@@ -236,7 +291,10 @@ export default function LandingLayout({
                         value={`$${(
                           tier.pricePerAdditionalCollective / 100
                         ).toFixed(2)}`}
-                        isPopular={tier.title === recommendedPlan}
+                        isPopular={
+                          tier.title === recommendedPlan &&
+                          tier.type === selectedTierType
+                        }
                         isHovered={hoveredTier === tier.title}
                         onHover={setHoveredTier}
                         tier={tier}
@@ -248,7 +306,7 @@ export default function LandingLayout({
                   <AnimatedTableRow show={overviewOpen}>
                     <th
                       scope="row"
-                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
+                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left w-[250px] max-w-[250px]"
                     >
                       Monthly expenses
                     </th>
@@ -256,7 +314,10 @@ export default function LandingLayout({
                       <PricingFeatureCell
                         key={`${tier.title}-expenses`}
                         value={tier.includedExpensesPerMonth}
-                        isPopular={tier.title === recommendedPlan}
+                        isPopular={
+                          tier.title === recommendedPlan &&
+                          tier.type === selectedTierType
+                        }
                         isHovered={hoveredTier === tier.title}
                         onHover={setHoveredTier}
                         tier={tier}
@@ -268,7 +329,7 @@ export default function LandingLayout({
                   <AnimatedTableRow show={overviewOpen}>
                     <th
                       scope="row"
-                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
+                      className="px-6 py-4 text-sm font-medium text-gray-900 text-left w-[250px] max-w-[250px]"
                     >
                       Additional expense
                     </th>
@@ -278,7 +339,10 @@ export default function LandingLayout({
                         value={`$${(
                           tier.pricePerAdditionalExpense / 100
                         ).toFixed(2)}`}
-                        isPopular={tier.title === recommendedPlan}
+                        isPopular={
+                          tier.title === recommendedPlan &&
+                          tier.type === selectedTierType
+                        }
                         isHovered={hoveredTier === tier.title}
                         onHover={setHoveredTier}
                         tier={tier}
@@ -312,7 +376,7 @@ export default function LandingLayout({
                     <AnimatedTableRow key={feature} show={featuresOpen}>
                       <th
                         scope="row"
-                        className="px-6 py-4 text-sm font-medium text-gray-900 text-left"
+                        className="px-6 py-4 text-sm font-medium text-gray-900 text-left w-[250px] max-w-[250px]"
                       >
                         {feature}
                       </th>
@@ -332,7 +396,10 @@ export default function LandingLayout({
                           }
                           tier={tier}
                           onHover={setHoveredTier}
-                          isPopular={tier.title === recommendedPlan}
+                          isPopular={
+                            tier.title === recommendedPlan &&
+                            tier.type === selectedTierType
+                          }
                           isHovered={hoveredTier === tier.title}
                         />
                       ))}

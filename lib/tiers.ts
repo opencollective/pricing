@@ -58,7 +58,7 @@ const proFeatures = [
 ];
 
 const featuresForTiers = {
-  [TierType.STARTER]: {
+  [TierType.FREE]: {
     // Map all features to booleans based on whether they are included in freeFeatures
     ...Object.fromEntries(
       Object.values(features).map((feature) => [
@@ -91,7 +91,7 @@ export { featuresForTiers, features };
 
 export const tiers: Tier[] = [
   {
-    type: TierType.STARTER,
+    type: TierType.FREE,
     title: "Free",
     pricePerMonth: 0,
     includedCollectives: 1,

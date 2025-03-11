@@ -33,9 +33,9 @@ export function PricingTierColumn({
   const headingColor = isPopular ? "text-indigo-700" : "text-gray-900";
 
   return (
-    <th className={`px-3 pt-4`}>
+    <th className={`px-3 pt-4 min-w-[250px]`}>
       <div
-        className={`relative w-[160px] h-full px-3 pt-5 pb-3 border rounded-xl transition-colors ${
+        className={`relative w-full h-full px-3 pt-5 pb-3 border rounded-xl transition-colors ${
           isHovered ? "bg-gray-50" : "bg-white"
         } ${isPopular ? "ring-2 ring-indigo-600" : ""}`}
         onMouseEnter={() => onHover(tier.title)}

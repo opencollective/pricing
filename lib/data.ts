@@ -129,11 +129,11 @@ export async function fetchDataFromDatabase() {
 
     // Past 12 calendar months (excluding current month)
     const pastYearEnd = prevMonthEnd;
-    const pastYearStart = new Date(
-      pastYearEnd.getFullYear() - 1,
-      pastYearEnd.getMonth() + 1,
-      1
-    );
+    // const pastYearStart = new Date(
+    //   pastYearEnd.getFullYear() - 1,
+    //   pastYearEnd.getMonth() + 1,
+    //   1
+    // );
 
     // Generate dates for the past 12 months to use in our query
     const monthDates = [];

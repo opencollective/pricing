@@ -3,17 +3,18 @@ import { fetchCollectiveBySlug } from "@/lib/data";
 import { CollectiveChart } from "@/components/ui/collective-chart";
 import { tiers } from "@/lib/tiers";
 import { PricingTierCollapsible } from "@/components/PricingTierCollapsible";
-
-type Props = {
-  params: {
-    slug: string;
-  };
-};
-
+import React from "react";
 // This page can be statically generated at build time if you provide a list of slugs
 // via the generateStaticParams function, or it can be dynamically generated
-export default async function CollectivePage({ params }: Props) {
-  const { slug } = params;
+
+interface PageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
+
+export default async function CollectivePage({ params }: PageProps) {
+  const { slug } = await params;
 
   // Fetch data for this specific collective
   const collective = await fetchCollectiveBySlug(slug);

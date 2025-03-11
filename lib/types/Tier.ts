@@ -2,7 +2,7 @@
  * Enum for tier types
  */
 export enum TierType {
-  STARTER = "Starter",
+  FREE = "Free",
   BASIC = "Basic",
   PRO = "Pro",
 }

@@ -13,7 +13,6 @@ interface PricingFeatureCellProps {
 
 export function PricingFeatureCell({
   value,
-  isPopular,
   isHovered = false,
   onHover,
   tier,
