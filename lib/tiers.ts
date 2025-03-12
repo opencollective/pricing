@@ -173,7 +173,7 @@ export const tiers: Tier[] = [
   {
     type: TierType.PRO,
     title: "Pro XL",
-    pricePerMonth: 199900, // $1999.00
+    pricePerMonth: 1999900, // $19999.00
     includedCollectives: 2500,
     pricePerAdditionalCollective: 999, // $9.99
     includedExpensesPerMonth: 25000,
