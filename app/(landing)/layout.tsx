@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useEffect } from "react";
 import { tiers, featuresForTiers, features } from "../../lib/tiers";
-import { PricingInterval, TierType } from "../../lib/types/Tier";
+import { PricingInterval, Tier, TierType } from "../../lib/types/Tier";
 import { PricingTierColumn } from "../../components/PricingTierColumn";
 import { PricingFeatureCell } from "../../components/PricingFeatureCell";
 import Link from "next/link";
@@ -17,7 +17,7 @@ type PlanContextType = {
   setExpenses: (value: number) => void;
   collectives: number;
   setCollectives: (value: number) => void;
-  recommendedPlan: string;
+  recommendedPlan: Tier;
   selectedTierType: TierType;
   setSelectedTierType: (value: TierType) => void;
 };
@@ -34,8 +34,8 @@ export function usePlanContext() {
       setExpenses: () => {},
       collectives: 5,
       setCollectives: () => {},
-      recommendedPlan: "Basic S",
-      selectedTierType: TierType.BASIC,
+      recommendedPlan: tiers[1], // remove?
+      selectedTierType: TierType.BASIC, // remove?
       setSelectedTierType: () => {},
     };
   }
@@ -93,6 +93,13 @@ export default function LandingLayout({
 
   // Calculate the recommended plan based on the current values
   const recommendedPlan = calculateBestTier(expenses, collectives);
+
+  // Update selectedTierType when recommendedPlan type changes
+  useEffect(() => {
+    if (recommendedPlan.type !== selectedTierType) {
+      setSelectedTierType(recommendedPlan.type);
+    }
+  }, [recommendedPlan.type]);
 
   // Get the visible tiers
   const visibleTiers = tiers.filter((tier) => tier.type === selectedTierType);
@@ -221,7 +228,7 @@ export default function LandingLayout({
                         tier={tier}
                         interval={interval}
                         isPopular={
-                          tier.title === recommendedPlan &&
+                          tier.title === recommendedPlan.title &&
                           tier.type === selectedTierType
                         }
                         isHovered={hoveredTier === tier.title}
@@ -267,7 +274,7 @@ export default function LandingLayout({
                         key={`${tier.title}-collectives`}
                         value={tier.includedCollectives}
                         isPopular={
-                          tier.title === recommendedPlan &&
+                          tier.title === recommendedPlan.title &&
                           tier.type === selectedTierType
                         }
                         isHovered={hoveredTier === tier.title}
@@ -292,7 +299,7 @@ export default function LandingLayout({
                           tier.pricePerAdditionalCollective / 100
                         ).toFixed(2)}`}
                         isPopular={
-                          tier.title === recommendedPlan &&
+                          tier.title === recommendedPlan.title &&
                           tier.type === selectedTierType
                         }
                         isHovered={hoveredTier === tier.title}
@@ -315,7 +322,7 @@ export default function LandingLayout({
                         key={`${tier.title}-expenses`}
                         value={tier.includedExpensesPerMonth}
                         isPopular={
-                          tier.title === recommendedPlan &&
+                          tier.title === recommendedPlan.title &&
                           tier.type === selectedTierType
                         }
                         isHovered={hoveredTier === tier.title}
@@ -340,7 +347,7 @@ export default function LandingLayout({
                           tier.pricePerAdditionalExpense / 100
                         ).toFixed(2)}`}
                         isPopular={
-                          tier.title === recommendedPlan &&
+                          tier.title === recommendedPlan.title &&
                           tier.type === selectedTierType
                         }
                         isHovered={hoveredTier === tier.title}
@@ -397,7 +404,7 @@ export default function LandingLayout({
                           tier={tier}
                           onHover={setHoveredTier}
                           isPopular={
-                            tier.title === recommendedPlan &&
+                            tier.title === recommendedPlan.title &&
                             tier.type === selectedTierType
                           }
                           isHovered={hoveredTier === tier.title}
