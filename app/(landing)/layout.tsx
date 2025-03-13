@@ -233,6 +233,7 @@ export default function LandingLayout({
                         }
                         isHovered={hoveredTier === tier.title}
                         onHover={setHoveredTier}
+                        useage={{ collectives, expenses }}
                       />
                     ))}
                   </tr>

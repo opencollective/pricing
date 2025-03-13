@@ -9,6 +9,10 @@ interface PricingTierColumnProps {
   isPopular: boolean;
   isHovered?: boolean;
   onHover: (tierId: string | null) => void;
+  useage?: {
+    collectives: number;
+    expenses: number;
+  };
 }
 
 export function PricingTierColumn({
@@ -17,6 +21,7 @@ export function PricingTierColumn({
   isPopular,
   isHovered = false,
   onHover,
+  useage,
 }: PricingTierColumnProps) {
   // Format price as dollars with proper formatting
   const formatPrice = (cents: number, decimals = 0) => {
@@ -35,6 +40,36 @@ export function PricingTierColumn({
     interval === PricingInterval.MONTHLY
       ? tier.pricePerMonth
       : tier.pricePerMonth * 10;
+
+  // Calculate total price based on usage if provided
+  const totalPrice = useage ? calculateTotalPrice() : price;
+
+  function calculateTotalPrice() {
+    // Calculate additional expenses cost
+    const additionalExpenses = Math.max(
+      0,
+      useage!.expenses - tier.includedExpensesPerMonth
+    );
+    const additionalExpensesCost =
+      additionalExpenses * tier.pricePerAdditionalExpense;
+
+    // Calculate additional collectives cost
+    const additionalCollectives = Math.max(
+      0,
+      useage!.collectives - tier.includedCollectives
+    );
+    const additionalCollectivesCost =
+      additionalCollectives * tier.pricePerAdditionalCollective;
+
+    // Calculate total monthly cost
+    const monthlyCost =
+      tier.pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
+
+    // Return monthly or yearly based on selected interval
+    return interval === PricingInterval.MONTHLY
+      ? monthlyCost
+      : monthlyCost * 10; // Apply the same yearly discount as the base price
+  }
 
   // Styles for highlighting the recommended column
   const headingColor = isPopular ? "text-indigo-700" : "text-gray-900";
@@ -63,12 +98,20 @@ export function PricingTierColumn({
             <span
               className={`text-4xl font-bold tracking-tight ${headingColor}`}
             >
-              {formatPrice(price, 0)}
+              {formatPrice(totalPrice, 0)}
             </span>
             <span className="text-sm font-semibold text-gray-600">
               {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
             </span>
           </div>
+
+          <div className="mt-1 font-normal text-sm text-gray-500">
+            Base price {formatPrice(price, 0)}
+            <span className="text-xs">
+              {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
+            </span>
+          </div>
+
           <div className="mt-6">
             <a
               href="#"
