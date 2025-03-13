@@ -1,4 +1,4 @@
-import { tiers } from "../tiers";
+import { defaultTiers } from "../tiers";
 import { Tier, PricingInterval } from "../types/Tier";
 import { Host } from "../data";
 
@@ -28,7 +28,7 @@ export const calculateBestTier = (
   const tierOptions = [];
 
   // Process each tier
-  for (const tier of tiers) {
+  for (const tier of defaultTiers) {
     // Monthly payment option
     const monthlyBreakdown = [];
     let yearlyTotalMonthlyPayment = 0;

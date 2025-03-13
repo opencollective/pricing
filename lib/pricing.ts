@@ -1,12 +1,12 @@
 /**
  * Function to calculate the best tier based on usage metrics
  */
-import { tiers } from "./tiers";
+import { defaultTiers } from "./tiers";
 import { Tier } from "./types/Tier";
 
 export function calculateBestTier(expenses: number, collectives: number): Tier {
   // Calculate costs for all tiers to find the lowest cost one
-  const tierCosts = tiers.map((tier) => {
+  const tierCosts = defaultTiers.map((tier) => {
     // Calculate additional expenses cost
     const additionalExpenses = Math.max(
       0,

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { fetchCollectiveBySlug } from "@/lib/data";
 import { CollectiveChart } from "@/components/ui/collective-chart";
-import { tiers } from "@/lib/tiers";
+import { defaultTiers } from "@/lib/tiers";
 import { PricingTierCollapsible } from "@/components/PricingTierCollapsible";
 import React from "react";
 // This page can be statically generated at build time if you provide a list of slugs
@@ -81,7 +81,7 @@ export default async function CollectivePage({ params }: PageProps) {
             <div className="space-y-8">
               {(() => {
                 // First, calculate costs for all tiers to find the lowest cost one
-                const tierCosts = tiers.map((tier) => {
+                const tierCosts = defaultTiers.map((tier) => {
                   // Calculate each month's costs separately
                   const monthlyData = collective.monthlyExpenses || [];
                   const monthlyCollectivesData =

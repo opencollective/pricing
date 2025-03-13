@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Slider } from "@/components/ui/slider";
 import { TierType } from "@/lib/types/Tier";
-import { tiers } from "@/lib/tiers";
+import { defaultTiers } from "@/lib/tiers";
 
 type PlanFinderProps = {
   onExpensesChange?: (value: number) => void;
@@ -29,11 +29,11 @@ export function PlanFinder({
 }: PlanFinderProps) {
   const expensesValues = [
     0,
-    ...tiers.map((tier) => tier.includedExpensesPerMonth),
+    ...defaultTiers.map((tier) => tier.includedExpensesPerMonth),
   ];
   const collectivesValues = [
     0,
-    ...tiers.map((tier) => tier.includedCollectives),
+    ...defaultTiers.map((tier) => tier.includedCollectives),
     5000,
   ];
   // Use internal state only if not controlled by parent
@@ -106,9 +106,11 @@ export function PlanFinder({
               htmlFor="expenses-slider"
               className="text-sm font-medium text-gray-700"
             >
-              Monthly Expenses
+              How many expenses per month will you pay?
             </label>
-            <span className="text-sm text-gray-600">{expenses}</span>
+            <span className="text-sm text-gray-600">
+              {expenses} expenses per month
+            </span>
           </div>
           <div className="relative pt-2 pb-8">
             <Slider
@@ -130,9 +132,11 @@ export function PlanFinder({
               htmlFor="collectives-slider"
               className="text-sm font-medium text-gray-700"
             >
-              Hosted Collectives
+              Will you host other collectives?
             </label>
-            <span className="text-sm text-gray-600">{collectives}</span>
+            <span className="text-sm text-gray-600">
+              {collectives} hosted collectives
+            </span>
           </div>
           <div className="relative pt-2 pb-8">
             <Slider

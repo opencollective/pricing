@@ -5,7 +5,7 @@ import { Tier } from "../lib/types/Tier";
 
 interface PricingFeatureCellProps {
   value: string | number | ReactNode;
-  tier: Tier;
+  onHoverKey: string;
   isPopular?: boolean;
   isHovered?: boolean;
   onHover: (tierId: string | null) => void;
@@ -15,7 +15,7 @@ export function PricingFeatureCell({
   value,
   isHovered = false,
   onHover,
-  tier,
+  onHoverKey,
 }: PricingFeatureCellProps) {
   // Styles for highlighting the popular column
   // const textColor = isPopular ? "text-indigo-600" : "text-gray-700";
@@ -25,7 +25,7 @@ export function PricingFeatureCell({
       className={`px-6 py-4 text-sm text-center font-medium text-gray-700 transition-colors ${
         isHovered ? "bg-gray-50" : ""
       } `}
-      onMouseEnter={() => onHover(tier.title)}
+      onMouseEnter={() => onHover(onHoverKey)}
       onMouseLeave={() => onHover(null)}
     >
       {value}

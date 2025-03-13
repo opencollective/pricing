@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState, createContext, useContext, useEffect } from "react";
-import { tiers, featuresForTiers, features } from "../../lib/tiers";
+import {
+  defaultTiers,
+  altTiers,
+  featuresForTiers,
+  features,
+} from "../../lib/tiers";
 import { PricingInterval, Tier, TierType } from "../../lib/types/Tier";
 import { PricingTierColumn } from "../../components/PricingTierColumn";
 import { PricingFeatureCell } from "../../components/PricingFeatureCell";
@@ -11,9 +16,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { calculateBestTier } from "../../lib/pricing";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
+import PricingSimulatorConfig from "../../components/PricingSimulatorConfig";
 // import TierLevels from "@/components/TierLevels";
 
+// Define a package type for the alternative tiers
+type AltTierPackage = {
+  title: string;
+  pricePerMonth: number;
+  includedCollectives: number;
+  pricePerAdditionalCollective: number;
+  includedExpensesPerMonth: number;
+  pricePerAdditionalExpense: number;
+};
+
 // Create a context for plan state
+export type TierSet = "default" | "alt-display" | "alt-model";
+
 type PlanContextType = {
   expenses: number;
   setExpenses: (value: number) => void;
@@ -22,6 +40,9 @@ type PlanContextType = {
   recommendedPlan: Tier;
   selectedTierType: TierType;
   setSelectedTierType: (value: TierType) => void;
+  tierSet: TierSet;
+  setTierSet: (value: TierSet) => void;
+  selectedPackagesForEachAltTier: Record<string, AltTierPackage>;
 };
 
 const PlanContext = createContext<PlanContextType | null>(null);
@@ -36,9 +57,12 @@ export function usePlanContext() {
       setExpenses: () => {},
       collectives: 5,
       setCollectives: () => {},
-      recommendedPlan: tiers[1], // remove?
+      recommendedPlan: defaultTiers[1], // remove?
       selectedTierType: TierType.BASIC, // remove?
       setSelectedTierType: () => {},
+      tierSet: "default" as TierSet,
+      setTierSet: () => {},
+      selectedPackagesForEachAltTier: {},
     };
   }
   return context;
@@ -88,10 +112,11 @@ export default function LandingLayout({
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
   const [overviewOpen, setOverviewOpen] = useState(true);
   const [featuresOpen, setFeaturesOpen] = useState(true);
+  const [tierSet, setTierSet] = useState<TierSet>("default");
 
   // Manage expense and collective state at the layout level
   const [expenses, setExpenses] = useState<number>(25);
-  const [collectives, setCollectives] = useState<number>(5);
+  const [collectives, setCollectives] = useState<number>(0);
 
   // Calculate the recommended plan based on the current values
   const recommendedPlan = calculateBestTier(expenses, collectives);
@@ -104,7 +129,53 @@ export default function LandingLayout({
   }, [recommendedPlan.type]);
 
   // Get the visible tiers
-  const visibleTiers = tiers.filter((tier) => tier.type === selectedTierType);
+  const visibleDefaultTiers = defaultTiers.filter(
+    (tier) => tier.type === selectedTierType
+  );
+
+  // Calculate the best package for each alternative tier based on usage
+  const selectedPackagesForEachAltTier = altTiers.reduce<
+    Record<string, AltTierPackage>
+  >((acc, tier) => {
+    // Calculate the total cost for each package in this tier
+    const packageCosts = tier.packages.map((pkg) => {
+      // Calculate additional expenses cost
+      const additionalExpenses = Math.max(
+        0,
+        expenses - pkg.includedExpensesPerMonth
+      );
+      const additionalExpensesCost =
+        additionalExpenses * pkg.pricePerAdditionalExpense;
+
+      // Calculate additional collectives cost
+      const additionalCollectives = Math.max(
+        0,
+        collectives - pkg.includedCollectives
+      );
+      const additionalCollectivesCost =
+        additionalCollectives * pkg.pricePerAdditionalCollective;
+
+      // Calculate total monthly cost
+      const totalMonthlyCost =
+        pkg.pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
+
+      return {
+        package: pkg,
+        totalMonthlyCost,
+      };
+    });
+
+    // Sort packages by total monthly cost to find the cheapest option
+    packageCosts.sort((a, b) => a.totalMonthlyCost - b.totalMonthlyCost);
+
+    // Get the package with the lowest total monthly cost
+    const bestPackage = packageCosts[0].package;
+
+    return {
+      ...acc,
+      [tier.type]: bestPackage,
+    };
+  }, {});
 
   // Create context value
   const contextValue = {
@@ -115,6 +186,9 @@ export default function LandingLayout({
     recommendedPlan,
     selectedTierType,
     setSelectedTierType,
+    tierSet,
+    setTierSet,
+    selectedPackagesForEachAltTier,
   };
 
   return (
@@ -172,47 +246,49 @@ export default function LandingLayout({
             </div>
           </div> */}
 
-          <div className="mt-6 flex flex-col items-center">
-            <p className="text-sm text-gray-600 mb-2">
-              Select a tier level to view available plans:
-            </p>
-            {/* Tier Type Selector */}
-            <div className="relative flex items-center rounded-full p-1 bg-gray-100 mb-4">
-              <button
-                type="button"
-                className={`${
-                  selectedTierType === TierType.FREE
-                    ? "bg-white shadow-md"
-                    : "text-gray-500"
-                } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
-                onClick={() => setSelectedTierType(TierType.FREE)}
-              >
-                Free
-              </button>
-              <button
-                type="button"
-                className={`${
-                  selectedTierType === TierType.BASIC
-                    ? "bg-white shadow-md"
-                    : "text-gray-500"
-                } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
-                onClick={() => setSelectedTierType(TierType.BASIC)}
-              >
-                Basic
-              </button>
-              <button
-                type="button"
-                className={`${
-                  selectedTierType === TierType.PRO
-                    ? "bg-white shadow-md"
-                    : "text-gray-500"
-                } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
-                onClick={() => setSelectedTierType(TierType.PRO)}
-              >
-                Pro
-              </button>
+          {tierSet === "default" && (
+            <div className="mt-6 flex flex-col items-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Select a tier level to view available plans:
+              </p>
+              {/* Tier Type Selector */}
+              <div className="relative flex items-center rounded-full p-1 bg-gray-100 mb-4">
+                <button
+                  type="button"
+                  className={`${
+                    selectedTierType === TierType.FREE
+                      ? "bg-white shadow-md"
+                      : "text-gray-500"
+                  } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                  onClick={() => setSelectedTierType(TierType.FREE)}
+                >
+                  Starter
+                </button>
+                <button
+                  type="button"
+                  className={`${
+                    selectedTierType === TierType.BASIC
+                      ? "bg-white shadow-md"
+                      : "text-gray-500"
+                  } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                  onClick={() => setSelectedTierType(TierType.BASIC)}
+                >
+                  Basic
+                </button>
+                <button
+                  type="button"
+                  className={`${
+                    selectedTierType === TierType.PRO
+                      ? "bg-white shadow-md"
+                      : "text-gray-500"
+                  } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                  onClick={() => setSelectedTierType(TierType.PRO)}
+                >
+                  Pro
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="mx-auto mt-8 max-w-7xl">
             {/* Pricing Comparison Table */}
@@ -250,7 +326,9 @@ export default function LandingLayout({
                           <label htmlFor={PricingInterval.YEARLY}>
                             <span className="whitespace-nowrap">
                               Yearly billing{" "}
-                              <Badge className="ml-2">Save 20%</Badge>
+                              <Badge variant="outline" className="ml-2">
+                                Save 20%
+                              </Badge>
                             </span>
                           </label>
                         </div>
@@ -258,20 +336,60 @@ export default function LandingLayout({
                     </th>
 
                     {/* Tier Headers using PricingTierColumn component */}
-                    {visibleTiers.map((tier) => (
-                      <PricingTierColumn
-                        key={tier.title}
-                        tier={tier}
-                        interval={interval}
-                        isPopular={
-                          tier.title === recommendedPlan.title &&
-                          tier.type === selectedTierType
-                        }
-                        isHovered={hoveredTier === tier.title}
-                        onHover={setHoveredTier}
-                        useage={{ collectives, expenses }}
-                      />
-                    ))}
+                    {tierSet === "default"
+                      ? visibleDefaultTiers.map((tier) => (
+                          <PricingTierColumn
+                            key={tier.title}
+                            title={tier.title}
+                            pricePerMonth={tier.pricePerMonth}
+                            includedExpensesPerMonth={
+                              tier.includedExpensesPerMonth
+                            }
+                            pricePerAdditionalExpense={
+                              tier.pricePerAdditionalExpense
+                            }
+                            includedCollectives={tier.includedCollectives}
+                            pricePerAdditionalCollective={
+                              tier.pricePerAdditionalCollective
+                            }
+                            interval={interval}
+                            isPopular={
+                              tier.title === recommendedPlan.title &&
+                              tier.type === selectedTierType
+                            }
+                            isHovered={hoveredTier === tier.title}
+                            onHover={setHoveredTier}
+                            useage={{ collectives, expenses }}
+                          />
+                        ))
+                      : altTiers.map((tier) => {
+                          const data =
+                            tierSet === "alt-display"
+                              ? selectedPackagesForEachAltTier[tier.type]
+                              : {
+                                  pricePerMonth:
+                                    tier.altPricingModel.basePricePerMonth,
+                                  ...tier.altPricingModel,
+                                };
+                          return (
+                            <PricingTierColumn
+                              key={tier.type}
+                              {...data}
+                              title={tier.type}
+                              label={
+                                tierSet === "alt-display"
+                                  ? selectedPackagesForEachAltTier[tier.type]
+                                      .title
+                                  : undefined
+                              }
+                              interval={interval}
+                              isPopular={false}
+                              isHovered={hoveredTier === tier.type}
+                              onHover={setHoveredTier}
+                              useage={{ collectives, expenses }}
+                            />
+                          );
+                        })}
                   </tr>
                 </thead>
 
@@ -280,7 +398,11 @@ export default function LandingLayout({
                   {/* Overview Section Header */}
                   <tr>
                     <td
-                      colSpan={visibleTiers.length + 1}
+                      colSpan={
+                        tierSet === "default"
+                          ? visibleDefaultTiers.length + 1
+                          : altTiers.length + 1
+                      }
                       className="px-6 pb-4 pt-2 text-sm"
                     >
                       <button
@@ -306,19 +428,36 @@ export default function LandingLayout({
                     >
                       Included Collectives
                     </th>
-                    {visibleTiers.map((tier) => (
-                      <PricingFeatureCell
-                        key={`${tier.title}-collectives`}
-                        value={tier.includedCollectives}
-                        isPopular={
-                          tier.title === recommendedPlan.title &&
-                          tier.type === selectedTierType
-                        }
-                        isHovered={hoveredTier === tier.title}
-                        onHover={setHoveredTier}
-                        tier={tier}
-                      />
-                    ))}
+                    {tierSet === "default"
+                      ? visibleDefaultTiers.map((tier) => (
+                          <PricingFeatureCell
+                            key={`${tier.title}-collectives`}
+                            value={tier.includedCollectives}
+                            isPopular={
+                              tier.title === recommendedPlan.title &&
+                              tier.type === selectedTierType
+                            }
+                            isHovered={hoveredTier === tier.title}
+                            onHover={setHoveredTier}
+                            onHoverKey={tier.title}
+                          />
+                        ))
+                      : altTiers.map((tier) => {
+                          return (
+                            <PricingFeatureCell
+                              key={`${tier.type}-collectives`}
+                              value={
+                                tierSet === "alt-display"
+                                  ? selectedPackagesForEachAltTier[tier.type]
+                                      .includedCollectives
+                                  : tier.altPricingModel.includedCollectives
+                              }
+                              isHovered={hoveredTier === tier.type}
+                              onHover={setHoveredTier}
+                              onHoverKey={tier.type}
+                            />
+                          );
+                        })}
                   </AnimatedTableRow>
 
                   {/* Price per Additional Collective */}
@@ -329,21 +468,39 @@ export default function LandingLayout({
                     >
                       Additional collective
                     </th>
-                    {visibleTiers.map((tier) => (
-                      <PricingFeatureCell
-                        key={`${tier.title}-extra-collective`}
-                        value={`$${(
-                          tier.pricePerAdditionalCollective / 100
-                        ).toFixed(2)}`}
-                        isPopular={
-                          tier.title === recommendedPlan.title &&
-                          tier.type === selectedTierType
-                        }
-                        isHovered={hoveredTier === tier.title}
-                        onHover={setHoveredTier}
-                        tier={tier}
-                      />
-                    ))}
+                    {tierSet === "default"
+                      ? visibleDefaultTiers.map((tier) => (
+                          <PricingFeatureCell
+                            key={`${tier.title}-extra-collective`}
+                            value={`$${(
+                              tier.pricePerAdditionalCollective / 100
+                            ).toFixed(2)}`}
+                            isPopular={
+                              tier.title === recommendedPlan.title &&
+                              tier.type === selectedTierType
+                            }
+                            isHovered={hoveredTier === tier.title}
+                            onHover={setHoveredTier}
+                            onHoverKey={tier.title}
+                          />
+                        ))
+                      : altTiers.map((tier) => {
+                          const { pricePerAdditionalCollective } =
+                            tierSet === "alt-display"
+                              ? selectedPackagesForEachAltTier[tier.type]
+                              : tier.altPricingModel;
+                          return (
+                            <PricingFeatureCell
+                              key={`${tier.type}-extra-collective`}
+                              value={`$${(
+                                pricePerAdditionalCollective / 100
+                              ).toFixed(2)}`}
+                              isHovered={hoveredTier === tier.type}
+                              onHover={setHoveredTier}
+                              onHoverKey={tier.type}
+                            />
+                          );
+                        })}
                   </AnimatedTableRow>
 
                   {/* Included Expenses */}
@@ -354,19 +511,36 @@ export default function LandingLayout({
                     >
                       Monthly expenses
                     </th>
-                    {visibleTiers.map((tier) => (
-                      <PricingFeatureCell
-                        key={`${tier.title}-expenses`}
-                        value={tier.includedExpensesPerMonth}
-                        isPopular={
-                          tier.title === recommendedPlan.title &&
-                          tier.type === selectedTierType
-                        }
-                        isHovered={hoveredTier === tier.title}
-                        onHover={setHoveredTier}
-                        tier={tier}
-                      />
-                    ))}
+                    {tierSet === "default"
+                      ? visibleDefaultTiers.map((tier) => (
+                          <PricingFeatureCell
+                            key={`${tier.title}-expenses`}
+                            value={tier.includedExpensesPerMonth}
+                            isPopular={
+                              tier.title === recommendedPlan.title &&
+                              tier.type === selectedTierType
+                            }
+                            isHovered={hoveredTier === tier.title}
+                            onHover={setHoveredTier}
+                            onHoverKey={tier.title}
+                          />
+                        ))
+                      : altTiers.map((tier) => {
+                          return (
+                            <PricingFeatureCell
+                              key={`${tier.type}-expenses`}
+                              value={
+                                (tierSet === "alt-display"
+                                  ? selectedPackagesForEachAltTier[tier.type]
+                                  : tier.altPricingModel
+                                ).includedExpensesPerMonth
+                              }
+                              isHovered={hoveredTier === tier.type}
+                              onHover={setHoveredTier}
+                              onHoverKey={tier.type}
+                            />
+                          );
+                        })}
                   </AnimatedTableRow>
 
                   {/* Price per Additional Expense */}
@@ -377,27 +551,48 @@ export default function LandingLayout({
                     >
                       Additional expense
                     </th>
-                    {visibleTiers.map((tier) => (
-                      <PricingFeatureCell
-                        key={`${tier.title}-extra-expense`}
-                        value={`$${(
-                          tier.pricePerAdditionalExpense / 100
-                        ).toFixed(2)}`}
-                        isPopular={
-                          tier.title === recommendedPlan.title &&
-                          tier.type === selectedTierType
-                        }
-                        isHovered={hoveredTier === tier.title}
-                        onHover={setHoveredTier}
-                        tier={tier}
-                      />
-                    ))}
+                    {tierSet === "default"
+                      ? visibleDefaultTiers.map((tier) => (
+                          <PricingFeatureCell
+                            key={`${tier.title}-extra-expense`}
+                            value={`$${(
+                              tier.pricePerAdditionalExpense / 100
+                            ).toFixed(2)}`}
+                            isPopular={
+                              tier.title === recommendedPlan.title &&
+                              tier.type === selectedTierType
+                            }
+                            isHovered={hoveredTier === tier.title}
+                            onHover={setHoveredTier}
+                            onHoverKey={tier.title}
+                          />
+                        ))
+                      : altTiers.map((tier) => {
+                          return (
+                            <PricingFeatureCell
+                              key={`${tier.type}-extra-expense`}
+                              value={`$${(
+                                (tierSet === "alt-display"
+                                  ? selectedPackagesForEachAltTier[tier.type]
+                                  : tier.altPricingModel
+                                ).pricePerAdditionalExpense / 100
+                              ).toFixed(2)}`}
+                              isHovered={hoveredTier === tier.type}
+                              onHover={setHoveredTier}
+                              onHoverKey={tier.type}
+                            />
+                          );
+                        })}
                   </AnimatedTableRow>
 
                   {/* Features Section Header */}
                   <tr>
                     <td
-                      colSpan={visibleTiers.length + 1}
+                      colSpan={
+                        tierSet === "default"
+                          ? visibleDefaultTiers.length + 1
+                          : altTiers.length + 1
+                      }
                       className="px-6 pb-4 pt-2 text-sm"
                     >
                       <button
@@ -424,29 +619,52 @@ export default function LandingLayout({
                       >
                         {feature}
                       </th>
-                      {visibleTiers.map((tier) => (
-                        <PricingFeatureCell
-                          key={`${tier.title}-${feature}`}
-                          value={
-                            featuresForTiers[tier.type][feature] ? (
-                              <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
-                                <Check strokeWidth={3} size={10} />
-                              </div>
-                            ) : (
-                              <div className="rounded-full flex justify-center items-center size-3.5 bg-gray-200 text-gray-400 justify-self-center">
-                                <X strokeWidth={3} size={10} />
-                              </div>
-                            )
-                          }
-                          tier={tier}
-                          onHover={setHoveredTier}
-                          isPopular={
-                            tier.title === recommendedPlan.title &&
-                            tier.type === selectedTierType
-                          }
-                          isHovered={hoveredTier === tier.title}
-                        />
-                      ))}
+                      {tierSet === "default"
+                        ? visibleDefaultTiers.map((tier) => (
+                            <PricingFeatureCell
+                              key={`${tier.title}-${feature}`}
+                              value={
+                                featuresForTiers[tier.type][feature] ? (
+                                  <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
+                                    <Check strokeWidth={3} size={10} />
+                                  </div>
+                                ) : (
+                                  <div className="rounded-full flex justify-center items-center size-3.5 bg-gray-200 text-gray-400 justify-self-center">
+                                    <X strokeWidth={3} size={10} />
+                                  </div>
+                                )
+                              }
+                              isPopular={
+                                tier.title === recommendedPlan.title &&
+                                tier.type === selectedTierType
+                              }
+                              isHovered={hoveredTier === tier.title}
+                              onHover={setHoveredTier}
+                              onHoverKey={tier.title}
+                            />
+                          ))
+                        : altTiers.map((tier) => {
+                            return (
+                              <PricingFeatureCell
+                                key={`${tier.type}-${feature}`}
+                                value={
+                                  featuresForTiers[tier.type] &&
+                                  featuresForTiers[tier.type][feature] ? (
+                                    <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
+                                      <Check strokeWidth={3} size={10} />
+                                    </div>
+                                  ) : (
+                                    <div className="rounded-full flex justify-center items-center size-3.5 bg-gray-200 text-gray-400 justify-self-center">
+                                      <X strokeWidth={3} size={10} />
+                                    </div>
+                                  )
+                                }
+                                isHovered={hoveredTier === tier.type}
+                                onHover={setHoveredTier}
+                                onHoverKey={tier.type}
+                              />
+                            );
+                          })}
                     </AnimatedTableRow>
                   ))}
                 </tbody>
@@ -477,6 +695,7 @@ export default function LandingLayout({
           </div>
         </div>
       </div>
+      <PricingSimulatorConfig />
     </PlanContext.Provider>
   );
 }

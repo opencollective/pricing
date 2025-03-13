@@ -2,7 +2,7 @@
  * Enum for tier types
  */
 export enum TierType {
-  FREE = "Free",
+  FREE = "Starter",
   BASIC = "Basic",
   PRO = "Pro",
 }
@@ -13,6 +13,36 @@ export enum TierType {
 export enum PricingInterval {
   MONTHLY = "monthly",
   YEARLY = "yearly",
+}
+
+export interface AltTier {
+  type: TierType;
+  altPricingModel: {
+    basePricePerMonth: number;
+    includedExpensesPerMonth: number;
+    includedCollectives: number;
+    pricePerAdditionalExpense: number;
+    pricePerAdditionalCollective: number;
+  };
+  packages: {
+    /** The display title of the tier */
+    title: string;
+
+    /** The monthly price in the smallest currency unit (e.g., cents) */
+    pricePerMonth: number;
+
+    /** Number of collectives included in this tier */
+    includedCollectives: number;
+
+    /** Price for each additional collective beyond the included amount (monthly) */
+    pricePerAdditionalCollective: number;
+
+    /** Number of expenses included in this tier */
+    includedExpensesPerMonth: number;
+
+    /** Price for each additional expense beyond the included amount (monthly) */
+    pricePerAdditionalExpense: number;
+  }[];
 }
 
 /**

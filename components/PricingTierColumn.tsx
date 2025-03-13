@@ -1,11 +1,17 @@
 "use client";
 
 import React from "react";
-import { PricingInterval, Tier } from "../lib/types/Tier";
+import { PricingInterval } from "../lib/types/Tier";
+import { Badge } from "./ui/badge";
 
 interface PricingTierColumnProps {
-  tier: Tier;
+  title: string;
   interval: PricingInterval;
+  pricePerMonth: number;
+  includedExpensesPerMonth: number;
+  pricePerAdditionalExpense: number;
+  includedCollectives: number;
+  pricePerAdditionalCollective: number;
   isPopular: boolean;
   isHovered?: boolean;
   onHover: (tierId: string | null) => void;
@@ -13,15 +19,22 @@ interface PricingTierColumnProps {
     collectives: number;
     expenses: number;
   };
+  label?: string;
 }
 
 export function PricingTierColumn({
-  tier,
+  title,
+  pricePerMonth,
+  includedExpensesPerMonth,
+  pricePerAdditionalExpense,
+  includedCollectives,
+  pricePerAdditionalCollective,
   interval,
   isPopular,
   isHovered = false,
   onHover,
   useage,
+  label,
 }: PricingTierColumnProps) {
   // Format price as dollars with proper formatting
   const formatPrice = (cents: number, decimals = 0) => {
@@ -37,9 +50,7 @@ export function PricingTierColumn({
   };
 
   const price =
-    interval === PricingInterval.MONTHLY
-      ? tier.pricePerMonth
-      : tier.pricePerMonth * 10;
+    interval === PricingInterval.MONTHLY ? pricePerMonth : pricePerMonth * 10;
 
   // Calculate total price based on usage if provided
   const totalPrice = useage ? calculateTotalPrice() : price;
@@ -48,22 +59,22 @@ export function PricingTierColumn({
     // Calculate additional expenses cost
     const additionalExpenses = Math.max(
       0,
-      useage!.expenses - tier.includedExpensesPerMonth
+      useage!.expenses - includedExpensesPerMonth
     );
     const additionalExpensesCost =
-      additionalExpenses * tier.pricePerAdditionalExpense;
+      additionalExpenses * pricePerAdditionalExpense;
 
     // Calculate additional collectives cost
     const additionalCollectives = Math.max(
       0,
-      useage!.collectives - tier.includedCollectives
+      useage!.collectives - includedCollectives
     );
     const additionalCollectivesCost =
-      additionalCollectives * tier.pricePerAdditionalCollective;
+      additionalCollectives * pricePerAdditionalCollective;
 
     // Calculate total monthly cost
     const monthlyCost =
-      tier.pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
+      pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
 
     // Return monthly or yearly based on selected interval
     return interval === PricingInterval.MONTHLY
@@ -79,7 +90,7 @@ export function PricingTierColumn({
         className={`relative w-full h-full px-3 pt-5 pb-3 border rounded-xl transition-colors ${
           isHovered ? "bg-gray-50" : "bg-white"
         } ${isPopular ? "ring-2 ring-blue-600" : ""}`}
-        onMouseEnter={() => onHover(tier.title)}
+        onMouseEnter={() => onHover(title)}
         onMouseLeave={() => onHover(null)}
       >
         {isPopular && (
@@ -91,7 +102,7 @@ export function PricingTierColumn({
         )}
         <div className={`text-center ${isPopular ? "relative z-10" : ""}`}>
           <h3 className={`text-xl font-semibold text-gray-900`}>
-            {tier.title}
+            {title} {label}
           </h3>
           <div className="mt-2 flex items-baseline justify-center gap-x-1">
             <span className={`text-4xl font-bold tracking-tight text-gray-900`}>
@@ -108,7 +119,6 @@ export function PricingTierColumn({
               {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
             </span>
           </div>
-
           <div className="mt-6">
             <a
               href="#"

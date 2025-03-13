@@ -1,4 +1,4 @@
-import { Tier, TierType } from "./types/Tier";
+import { AltTier, Tier, TierType } from "./types/Tier";
 
 const features = {
   // Basic features (all tiers)
@@ -89,10 +89,121 @@ const featuresForTiers = {
 
 export { featuresForTiers, features };
 
-export const tiers: Tier[] = [
+export const altTiers: AltTier[] = [
   {
     type: TierType.FREE,
-    title: "Free",
+    altPricingModel: {
+      basePricePerMonth: 0,
+      includedExpensesPerMonth: 5,
+      includedCollectives: 0,
+      pricePerAdditionalExpense: 199,
+      pricePerAdditionalCollective: 999,
+    },
+    packages: [
+      {
+        title: "",
+        pricePerMonth: 0,
+        includedCollectives: 1,
+        pricePerAdditionalCollective: 1999, // $19.99
+        includedExpensesPerMonth: 5,
+        pricePerAdditionalExpense: 299, // $2.99
+      },
+    ],
+  },
+  {
+    type: TierType.BASIC,
+    altPricingModel: {
+      basePricePerMonth: 4900,
+      includedExpensesPerMonth: 5,
+      includedCollectives: 0,
+      pricePerAdditionalExpense: 299,
+      pricePerAdditionalCollective: 1099,
+    },
+    packages: [
+      {
+        title: "S",
+        pricePerMonth: 4900, // $49.00
+        includedCollectives: 5,
+        pricePerAdditionalCollective: 1999, // $19.99
+        includedExpensesPerMonth: 25,
+        pricePerAdditionalExpense: 299, // $2.99
+      },
+      {
+        title: "M",
+        pricePerMonth: 9900, // $99.00
+        includedCollectives: 10,
+        pricePerAdditionalCollective: 1899, // $18.99
+        includedExpensesPerMonth: 50,
+        pricePerAdditionalExpense: 289, // $2.89
+      },
+      {
+        title: "L",
+        pricePerMonth: 29900, // $299.00
+        includedCollectives: 25,
+        pricePerAdditionalCollective: 1799, // $17.99
+        includedExpensesPerMonth: 100,
+        pricePerAdditionalExpense: 279, // $2.79
+      },
+      {
+        title: "XL",
+        pricePerMonth: 49900, // $499.00
+        includedCollectives: 50,
+        pricePerAdditionalCollective: 1699, // $16.99
+        includedExpensesPerMonth: 150,
+        pricePerAdditionalExpense: 269, // $2.69
+      },
+    ],
+  },
+  {
+    type: TierType.PRO,
+    altPricingModel: {
+      basePricePerMonth: 9900,
+      includedExpensesPerMonth: 5,
+      includedCollectives: 0,
+      pricePerAdditionalExpense: 349,
+      pricePerAdditionalCollective: 1199,
+    },
+    packages: [
+      {
+        title: "S",
+        pricePerMonth: 99900, // $999.00
+        includedCollectives: 100,
+        pricePerAdditionalCollective: 1299, // $12.99
+        includedExpensesPerMonth: 500,
+        pricePerAdditionalExpense: 199, // $1.99
+      },
+      {
+        title: "M",
+        pricePerMonth: 249900, // $2499.00
+        includedCollectives: 250,
+        pricePerAdditionalCollective: 1199, // $11.99
+        includedExpensesPerMonth: 2000,
+        pricePerAdditionalExpense: 149, // $1.49
+      },
+      {
+        title: "L",
+        pricePerMonth: 499900, // $4999.00
+        includedCollectives: 500,
+        pricePerAdditionalCollective: 999, // $9.99
+        includedExpensesPerMonth: 5000,
+        pricePerAdditionalExpense: 99, // $0.99
+      },
+      {
+        title: "XL",
+        pricePerMonth: 1999900, // $19999.00
+        includedCollectives: 2500,
+        pricePerAdditionalCollective: 999, // $9.99
+        includedExpensesPerMonth: 25000,
+        pricePerAdditionalExpense: 99, // $0.99
+      },
+    ],
+  },
+];
+
+export const defaultTiers: Tier[] = [
+  {
+    type: TierType.FREE,
+    title: "Starter",
     pricePerMonth: 0,
     includedCollectives: 1,
     pricePerAdditionalCollective: 1999, // $19.99

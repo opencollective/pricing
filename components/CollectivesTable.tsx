@@ -15,7 +15,7 @@ import {
   calculateBestTier,
   formatCurrency,
 } from "../lib/helpers/tierCalculation";
-import { tiers } from "../lib/tiers";
+import { defaultTiers } from "../lib/tiers";
 import {
   Table,
   TableHeader,
@@ -47,7 +47,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
     const tierContributions: Record<string, number> = {};
 
     // Pre-populate with all tiers to preserve order and include zero-count tiers
-    tiers.forEach((tier) => {
+    defaultTiers.forEach((tier) => {
       tierCounts[tier.title] = 0;
       tierContributions[tier.title] = 0;
     });
@@ -314,7 +314,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody className="bg-white divide-y divide-gray-100">
-                  {tiers.map((tier) => (
+                  {defaultTiers.map((tier) => (
                     <TableRow
                       key={tier.title}
                       className={
