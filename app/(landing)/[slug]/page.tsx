@@ -27,7 +27,7 @@ export default async function CollectivePage({ params }: PageProps) {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header section */}
         <div className="mx-auto max-w-4xl text-center mb-12">
-          <h1 className="text-base font-semibold leading-7 text-indigo-600">
+          <h1 className="text-base font-semibold leading-7 text-blue-600">
             Collective Details
           </h1>
           <p className="mt-2 text-4xl font-bold text-balance tracking-tight text-gray-900 sm:text-5xl">

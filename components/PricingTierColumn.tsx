@@ -72,32 +72,29 @@ export function PricingTierColumn({
   }
 
   // Styles for highlighting the recommended column
-  const headingColor = isPopular ? "text-indigo-700" : "text-gray-900";
 
   return (
     <th className={`px-3 pt-4 min-w-[250px]`}>
       <div
         className={`relative w-full h-full px-3 pt-5 pb-3 border rounded-xl transition-colors ${
           isHovered ? "bg-gray-50" : "bg-white"
-        } ${isPopular ? "ring-2 ring-indigo-600" : ""}`}
+        } ${isPopular ? "ring-2 ring-blue-600" : ""}`}
         onMouseEnter={() => onHover(tier.title)}
         onMouseLeave={() => onHover(null)}
       >
         {isPopular && (
           <div className="absolute z-20 top-0 left-1/2 -translate-y-1/2 -translate-x-1/2 transform">
-            <span className="inline-flex items-center rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
+            <span className="inline-flex items-center rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
               Recommended
             </span>
           </div>
         )}
         <div className={`text-center ${isPopular ? "relative z-10" : ""}`}>
-          <h3 className={`text-xl font-semibold ${headingColor}`}>
+          <h3 className={`text-xl font-semibold text-gray-900`}>
             {tier.title}
           </h3>
           <div className="mt-2 flex items-baseline justify-center gap-x-1">
-            <span
-              className={`text-4xl font-bold tracking-tight ${headingColor}`}
-            >
+            <span className={`text-4xl font-bold tracking-tight text-gray-900`}>
               {formatPrice(totalPrice, 0)}
             </span>
             <span className="text-sm font-semibold text-gray-600">
@@ -117,8 +114,8 @@ export function PricingTierColumn({
               href="#"
               className={`block rounded-md py-2.5 px-3.5 text-center text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
                 isPopular
-                  ? "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600"
-                  : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                  ? "bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600"
+                  : "bg-blue-50 text-blue-600 hover:bg-blue-100"
               }`}
             >
               Get started

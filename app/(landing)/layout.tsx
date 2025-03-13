@@ -122,7 +122,7 @@ export default function LandingLayout({
       <div className="py-24 sm:py-32">
         <div className="mx-auto px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-base font-semibold leading-7 text-indigo-600">
+            <h1 className="text-base font-semibold leading-7 text-primary">
               Pricing Simulator
             </h1>
             <p className="mt-2 text-4xl font-bold text-balance tracking-tight text-gray-900 sm:text-5xl">
@@ -459,7 +459,7 @@ export default function LandingLayout({
               These are proposed models for feedback only. Please{" "}
               <a
                 href="#"
-                className="font-semibold text-indigo-600 hover:text-indigo-500"
+                className="font-semibold text-primary-600 hover:text-primary/80"
               >
                 share your thoughts with us
               </a>
@@ -469,7 +469,7 @@ export default function LandingLayout({
             <div className="mt-8">
               <Link
                 href="/list"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 View Data
               </Link>
