@@ -9,6 +9,8 @@ import Link from "next/link";
 import { Check, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateBestTier } from "../../lib/pricing";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
 // import TierLevels from "@/components/TierLevels";
 
 // Create a context for plan state
@@ -118,7 +120,7 @@ export default function LandingLayout({
   return (
     <PlanContext.Provider value={contextValue}>
       <div className="py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-base font-semibold leading-7 text-indigo-600">
               Pricing Simulator
@@ -140,7 +142,7 @@ export default function LandingLayout({
           <div>
             <TierLevels />
           </div> */}
-          <div className="mt-2 flex justify-center">
+          {/* <div className="mt-2 flex justify-center">
             <div className="relative flex items-center rounded-full p-1 bg-gray-100">
               <button
                 type="button"
@@ -168,7 +170,8 @@ export default function LandingLayout({
                 </span>
               </button>
             </div>
-          </div>
+          </div> */}
+
           <div className="mt-6 flex flex-col items-center">
             <p className="text-sm text-gray-600 mb-2">
               Select a tier level to view available plans:
@@ -211,7 +214,7 @@ export default function LandingLayout({
             </div>
           </div>
 
-          <div className="mx-auto mt-8 max-w-6xl">
+          <div className="mx-auto mt-8 max-w-7xl">
             {/* Pricing Comparison Table */}
             <div className="overflow-x-auto rounded-xl ">
               <table className="w-full border-collapse pt-2">
@@ -219,7 +222,40 @@ export default function LandingLayout({
                 <thead>
                   <tr className="pt-2">
                     {/* Empty first cell */}
-                    <th className="px-6 pt-6 pb-8"></th>
+                    <th className="pt-6 pb-8 text-left font-normal flex flex-col items-start ">
+                      <h2 className="text-2xl font-semibold mb-2">
+                        Pick your plan
+                      </h2>
+                      <RadioGroup
+                        value={interval}
+                        onValueChange={(val) =>
+                          setInterval(val as PricingInterval)
+                        }
+                        defaultValue={PricingInterval.MONTHLY}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={PricingInterval.MONTHLY}
+                            id={PricingInterval.MONTHLY}
+                          />
+                          <label htmlFor={PricingInterval.MONTHLY}>
+                            Monthly billing
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={PricingInterval.YEARLY}
+                            id={PricingInterval.YEARLY}
+                          />
+                          <label htmlFor={PricingInterval.YEARLY}>
+                            <span className="whitespace-nowrap">
+                              Yearly billing{" "}
+                              <Badge className="ml-2">Save 20%</Badge>
+                            </span>
+                          </label>
+                        </div>
+                      </RadioGroup>
+                    </th>
 
                     {/* Tier Headers using PricingTierColumn component */}
                     {visibleTiers.map((tier) => (
