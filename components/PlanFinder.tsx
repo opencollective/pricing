@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Slider } from "@/components/ui/slider";
+import { TierType } from "@/lib/types/Tier";
+import { tiers } from "@/lib/tiers";
 
 type PlanFinderProps = {
   onExpensesChange?: (value: number) => void;
@@ -12,6 +14,7 @@ type PlanFinderProps = {
   collectives?: number;
   setExpenses?: (value: number) => void;
   setCollectives?: (value: number) => void;
+  selectedTierType?: TierType;
 };
 
 export function PlanFinder({
@@ -24,6 +27,15 @@ export function PlanFinder({
   setExpenses: controlledSetExpenses,
   setCollectives: controlledSetCollectives,
 }: PlanFinderProps) {
+  const expensesValues = [
+    0,
+    ...tiers.map((tier) => tier.includedExpensesPerMonth),
+  ];
+  const collectivesValues = [
+    0,
+    ...tiers.map((tier) => tier.includedCollectives),
+    5000,
+  ];
   // Use internal state only if not controlled by parent
   const [internalExpenses, setInternalExpenses] =
     useState<number>(initialExpenses);
@@ -38,8 +50,35 @@ export function PlanFinder({
       ? controlledCollectives
       : internalCollectives;
 
+  // Find the closest index in the predefined values array
+  const findClosestValueIndex = (
+    value: number,
+    valuesArray: number[]
+  ): number => {
+    let closestIndex = 0;
+    let minDiff = Math.abs(valuesArray[0] - value);
+
+    for (let i = 1; i < valuesArray.length; i++) {
+      const diff = Math.abs(valuesArray[i] - value);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIndex = i;
+      }
+    }
+
+    return closestIndex;
+  };
+
+  // Convert actual value to slider index
+  const expensesIndex = findClosestValueIndex(expenses, expensesValues);
+  const collectivesIndex = findClosestValueIndex(
+    collectives,
+    collectivesValues
+  );
+
   // Use either controlled or internal setters
-  const handleExpensesChange = (value: number) => {
+  const handleExpensesChange = (index: number) => {
+    const value = expensesValues[index];
     if (controlledSetExpenses) {
       controlledSetExpenses(value);
     } else {
@@ -48,7 +87,8 @@ export function PlanFinder({
     if (onExpensesChange) onExpensesChange(value);
   };
 
-  const handleCollectivesChange = (value: number) => {
+  const handleCollectivesChange = (index: number) => {
+    const value = collectivesValues[index];
     if (controlledSetCollectives) {
       controlledSetCollectives(value);
     } else {
@@ -56,8 +96,6 @@ export function PlanFinder({
     }
     if (onCollectivesChange) onCollectivesChange(value);
   };
-
-  // Calculate recommended plan
 
   return (
     <div className="mt-12 px-6 py-10 max-w-3xl mx-auto">
@@ -70,16 +108,16 @@ export function PlanFinder({
             >
               Monthly Expenses
             </label>
+            <span className="text-sm text-gray-600">{expenses}</span>
           </div>
           <div className="relative pt-2 pb-8">
             <Slider
               id="expenses-slider"
-              defaultValue={[expenses]}
-              value={[expenses]}
-              label={"expenses"}
-              min={1}
-              max={200}
-              step={5}
+              defaultValue={[expensesIndex]}
+              value={[expensesIndex]}
+              min={0}
+              max={expensesValues.length - 1}
+              step={1}
               onValueChange={(values) => handleExpensesChange(values[0])}
               className="w-full"
             />
@@ -94,15 +132,15 @@ export function PlanFinder({
             >
               Hosted Collectives
             </label>
+            <span className="text-sm text-gray-600">{collectives}</span>
           </div>
           <div className="relative pt-2 pb-8">
             <Slider
               id="collectives-slider"
-              defaultValue={[collectives]}
-              value={[collectives]}
-              label={"collectives"}
-              min={1}
-              max={60}
+              defaultValue={[collectivesIndex]}
+              value={[collectivesIndex]}
+              min={0}
+              max={collectivesValues.length - 1}
               step={1}
               onValueChange={(values) => handleCollectivesChange(values[0])}
               className="w-full"
