@@ -121,9 +121,9 @@ export default function LandingLayout({
             </p>
             <p className="mt-6 text-balance text-lg leading-8 text-gray-600">
               We&apos;re exploring a new business model to ensure long-term
-              sustainability. Your feedback on these potential pricing options
-              is invaluable as we work together to create a fair and transparent
-              funding approach.
+              sustainability. Your feedback on these pricing options is needed
+              as we work together to create a fair and transparent funding
+              model.
             </p>
           </div>
 

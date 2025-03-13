@@ -52,7 +52,7 @@ export default async function CollectivePage({ params }: PageProps) {
                 Total Raised
               </h3>
               <p className="mt-2 text-gray-600">
-                ${collective.totalRaisedUSD.toLocaleString()}
+                ${(collective.totalRaisedUSD / 100).toLocaleString()}
               </p>
             </div>
 
@@ -61,7 +61,7 @@ export default async function CollectivePage({ params }: PageProps) {
                 Platform Tips
               </h3>
               <p className="mt-2 text-gray-600">
-                ${collective.totalPlatformTips.toLocaleString()}
+                ${(collective.totalPlatformTips / 100).toLocaleString()}
               </p>
             </div>
           </div>

@@ -18,16 +18,23 @@ export function PricingTierColumn({
   isHovered = false,
   onHover,
 }: PricingTierColumnProps) {
-  // Format price as dollars
+  // Format price as dollars with proper formatting
   const formatPrice = (cents: number, decimals = 0) => {
     const dollars = cents / 100;
-    return dollars === 0 ? "$0" : `$${dollars.toFixed(decimals)}`;
+    if (dollars === 0) return "$0";
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(dollars);
   };
 
   const price =
     interval === PricingInterval.MONTHLY
       ? tier.pricePerMonth
-      : (tier.pricePerMonth * 10) / 12;
+      : tier.pricePerMonth * 10;
 
   // Styles for highlighting the recommended column
   const headingColor = isPopular ? "text-indigo-700" : "text-gray-900";
@@ -58,7 +65,9 @@ export function PricingTierColumn({
             >
               {formatPrice(price, 0)}
             </span>
-            <span className="text-sm font-semibold text-gray-600">/mo</span>
+            <span className="text-sm font-semibold text-gray-600">
+              {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
+            </span>
           </div>
           <div className="mt-6">
             <a

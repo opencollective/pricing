@@ -8,8 +8,13 @@ import { usePlanContext } from "./layout";
  * It uses the PlanContext to connect with the layout
  */
 export default function LandingPage() {
-  const { expenses, setExpenses, collectives, setCollectives } =
-    usePlanContext();
+  const {
+    expenses,
+    setExpenses,
+    collectives,
+    setCollectives,
+    selectedTierType,
+  } = usePlanContext();
 
   return (
     <PlanFinder
@@ -17,6 +22,7 @@ export default function LandingPage() {
       setExpenses={setExpenses}
       collectives={collectives}
       setCollectives={setCollectives}
+      selectedTierType={selectedTierType}
     />
   );
 }
