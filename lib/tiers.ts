@@ -92,6 +92,9 @@ export { featuresForTiers, features };
 export const altTiers: AltTier[] = [
   {
     type: TierType.FREE,
+    buttonClassNames: "bg-blue-900 text-white",
+    classNames: "text-blue-900 bg-blue-100",
+    bgColor: "rgb(222, 234, 254)",
     altPricingModel: {
       basePricePerMonth: 0,
       includedExpensesPerMonth: 5,
@@ -112,6 +115,9 @@ export const altTiers: AltTier[] = [
   },
   {
     type: TierType.BASIC,
+    buttonClassNames: "bg-teal-900 text-white",
+    classNames: "text-teal-900 bg-teal-100/50",
+    bgColor: "rgb(223, 227, 222)",
     altPricingModel: {
       basePricePerMonth: 4900,
       includedExpensesPerMonth: 5,
@@ -156,6 +162,9 @@ export const altTiers: AltTier[] = [
   },
   {
     type: TierType.PRO,
+    buttonClassNames: "text-white bg-orange-600",
+    classNames: "text-orange-600 bg-orange-100/90",
+    bgColor: "rgb(251, 235, 214)",
     altPricingModel: {
       basePricePerMonth: 9900,
       includedExpensesPerMonth: 5,

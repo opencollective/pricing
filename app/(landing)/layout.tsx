@@ -373,6 +373,9 @@ export default function LandingLayout({
                                 };
                           return (
                             <PricingTierColumn
+                              classNames={tier.classNames}
+                              buttonClassNames={tier.buttonClassNames}
+                              bgColor={tier.bgColor}
                               key={tier.type}
                               {...data}
                               title={tier.type}
@@ -650,7 +653,9 @@ export default function LandingLayout({
                                 value={
                                   featuresForTiers[tier.type] &&
                                   featuresForTiers[tier.type][feature] ? (
-                                    <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
+                                    <div
+                                      className={`rounded-full flex justify-center items-center size-3.5 ${tier.buttonClassNames} justify-self-center`}
+                                    >
                                       <Check strokeWidth={3} size={10} />
                                     </div>
                                   ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { TierType } from "@/lib/types/Tier";
 import { defaultTiers } from "@/lib/tiers";
@@ -30,6 +30,7 @@ export function PlanFinder({
   const expensesValues = [
     0,
     ...defaultTiers.map((tier) => tier.includedExpensesPerMonth),
+    50000,
   ];
   const collectivesValues = [
     0,
@@ -104,13 +105,11 @@ export function PlanFinder({
           <div className="flex justify-between mb-2">
             <label
               htmlFor="expenses-slider"
-              className="text-sm font-medium text-gray-700"
+              className="font-medium text-gray-700"
             >
               How many expenses per month will you pay?
             </label>
-            <span className="text-sm text-gray-600">
-              {expenses} expenses per month
-            </span>
+            <span className="text-gray-600">{expenses} expenses per month</span>
           </div>
           <div className="relative pt-2 pb-8">
             <Slider
@@ -130,11 +129,11 @@ export function PlanFinder({
           <div className="flex justify-between mb-2">
             <label
               htmlFor="collectives-slider"
-              className="text-sm font-medium text-gray-700"
+              className="font-medium text-gray-700"
             >
               Will you host other collectives?
             </label>
-            <span className="text-sm text-gray-600">
+            <span className="text-gray-600">
               {collectives} hosted collectives
             </span>
           </div>

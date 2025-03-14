@@ -1,7 +1,6 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { Tier } from "../lib/types/Tier";
 
 interface PricingFeatureCellProps {
   value: string | number | ReactNode;

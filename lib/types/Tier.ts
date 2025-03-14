@@ -17,6 +17,9 @@ export enum PricingInterval {
 
 export interface AltTier {
   type: TierType;
+  classNames: string;
+  buttonClassNames: string;
+  bgColor?: string;
   altPricingModel: {
     basePricePerMonth: number;
     includedExpensesPerMonth: number;
