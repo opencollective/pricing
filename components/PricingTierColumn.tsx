@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PricingInterval } from "../lib/types/Tier";
-
+import { formatAmount } from "@/lib/helpers";
 interface PricingTierColumnProps {
   title: string;
   interval: PricingInterval;
@@ -42,17 +42,6 @@ export function PricingTierColumn({
   bgColor,
 }: PricingTierColumnProps) {
   // Format price as dollars with proper formatting
-  const formatPrice = (cents: number, decimals = 0) => {
-    const dollars = cents / 100;
-    if (dollars === 0) return "$0";
-
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(dollars);
-  };
 
   const price =
     interval === PricingInterval.MONTHLY ? pricePerMonth : pricePerMonth * 10;
@@ -115,7 +104,7 @@ export function PricingTierColumn({
           </h3>
           <div className="mt-2 flex items-baseline justify-center gap-x-1">
             <span className={`text-4xl font-bold tracking-tight`}>
-              {formatPrice(totalPrice, 0)}
+              {formatAmount(totalPrice, 0)}
             </span>
             <span
               className={`text-sm font-semibold ${
@@ -131,7 +120,7 @@ export function PricingTierColumn({
               classNames ? "" : "text-gray-500"
             }`}
           >
-            Base price {formatPrice(price, 0)}
+            Base price {formatAmount(price, 0)}
             <span className="text-xs">
               {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
             </span>

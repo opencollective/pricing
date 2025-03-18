@@ -15,6 +15,7 @@ export type Host = {
   slug: string;
   name: string;
   type: "USER" | "ORGANIZATION" | "COLLECTIVE";
+  hostFeePercent: number;
   totalCollectives: number;
   totalActiveCollectives: number;
   // totalExpenses: number;
@@ -22,6 +23,7 @@ export type Host = {
   monthlyActiveCollectives: { month: string; count: number }[];
   totalRaisedUSD: number;
   totalRaisedCrowdfundingUSD: number;
+  totalRaisedNonCrowdfundingUSD: number;
   totalDisbursedUSD: number;
   totalPlatformTips: number;
 };
@@ -129,11 +131,15 @@ export async function fetchDataFromDatabase() {
 
     // Past 12 calendar months (excluding current month)
     const pastYearEnd = prevMonthEnd;
-    // const pastYearStart = new Date(
-    //   pastYearEnd.getFullYear() - 1,
-    //   pastYearEnd.getMonth() + 1,
-    //   1
-    // );
+    const pastYearStart = new Date(
+      pastYearEnd.getFullYear() - 1,
+      pastYearEnd.getMonth() + 1,
+      1
+    );
+
+    // Format dates for SQL query
+    const queryStartDate = pastYearStart.toISOString().split("T")[0];
+    const queryEndDate = pastYearEnd.toISOString().split("T")[0];
 
     // Generate dates for the past 12 months to use in our query
     const monthDates = [];
@@ -166,7 +172,7 @@ export async function fetchDataFromDatabase() {
         INNER JOIN "Transactions" t ON t."HostCollectiveId" = c."id"
         WHERE c."isHostAccount" IS TRUE 
           AND t."deletedAt" IS NULL
-          AND t."createdAt" > '2024-01-01'
+          AND t."createdAt" > ${queryStartDate}
           AND c."deletedAt" IS NULL
           AND c."id" NOT IN (969, 9804, 11049)
         GROUP BY c."id"
@@ -186,8 +192,8 @@ export async function fetchDataFromDatabase() {
           AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
           AND t1."deletedAt" IS NULL
           AND t1."RefundTransactionId" IS NULL
-          AND t1."createdAt" > '2024-01-01'
-          AND t1."createdAt" < '2025-01-01'
+          AND t1."createdAt" > ${queryStartDate}
+          AND t1."createdAt" < ${queryEndDate}
           AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
         GROUP BY h."id", t1."hostCurrency"
       ),
@@ -207,10 +213,32 @@ export async function fetchDataFromDatabase() {
           AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
           AND t1."deletedAt" IS NULL
           AND t1."RefundTransactionId" IS NULL
-          AND t1."createdAt" > '2024-01-01'
-          AND t1."createdAt" < '2025-01-01'
+          AND t1."createdAt" > ${queryStartDate}
+          AND t1."createdAt" < ${queryEndDate}
           AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
           AND pm."service" IN ('stripe', 'paypal')
+        GROUP BY h."id", t1."hostCurrency"
+      ),
+
+      "AmountRaisedNonCrowdfunding" AS (
+        SELECT h."id", COALESCE(SUM(t1."amountInHostCurrency"), 0) AS "totalRaised", 
+              t1."hostCurrency" AS "totalRaisedCurrency"
+        FROM "Transactions" t1
+        LEFT JOIN "Transactions" t2 
+          ON t2."type" = 'DEBIT' 
+          AND t2."kind" = t1."kind" 
+          AND t1."TransactionGroup" = t2."TransactionGroup" 
+          AND t2."deletedAt" IS NULL
+        INNER JOIN "Hosts" h ON h."id" = t1."HostCollectiveId"
+        LEFT JOIN "PaymentMethods" pm ON pm."id" = t1."PaymentMethodId"
+        WHERE t1."type" = 'CREDIT' 
+          AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
+          AND t1."deletedAt" IS NULL
+          AND t1."RefundTransactionId" IS NULL
+          AND t1."createdAt" > ${queryStartDate}
+          AND t1."createdAt" < ${queryEndDate}
+          AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
+          AND (pm."service" IS NULL OR pm."service" NOT IN ('stripe', 'paypal'))
         GROUP BY h."id", t1."hostCurrency"
       ),
 
@@ -228,8 +256,8 @@ export async function fetchDataFromDatabase() {
           AND t1."kind" IN ('CONTRIBUTION', 'EXPENSE', 'ADDED_FUNDS')
           AND t1."deletedAt" IS NULL
           AND t1."RefundTransactionId" IS NULL
-          AND t1."createdAt" > '2024-01-01'
-          AND t1."createdAt" < '2025-01-01'
+          AND t1."createdAt" > ${queryStartDate}
+          AND t1."createdAt" < ${queryEndDate}
           AND (t2."HostCollectiveId" IS NULL OR t1."HostCollectiveId" != t2."HostCollectiveId")
         GROUP BY h."id", t1."hostCurrency"
       ),
@@ -247,12 +275,12 @@ export async function fetchDataFromDatabase() {
         WHERE t."kind" = 'PLATFORM_TIP'
           AND t."type" = 'CREDIT'
           AND t."deletedAt" IS NULL
-          AND t."createdAt" > '2024-01-01'
-          AND t."createdAt" < '2025-01-01'
+          AND t."createdAt" > ${queryStartDate}
+          AND t."createdAt" < ${queryEndDate}
         GROUP BY h."id", t."hostCurrency"
       )
 
-      SELECT h."id", h."slug", h."name", h."type",
+      SELECT h."id", h."slug", h."name", h."type", h."hostFeePercent",
 
         -- COALESCE((
         --   SELECT COUNT(DISTINCT c."id")::INTEGER
@@ -370,6 +398,19 @@ export async function fetchDataFromDatabase() {
           WHERE ar."id" = h."id" 
           ORDER BY "totalRaised" DESC LIMIT 1
         ), 0) AS "totalRaisedCrowdfundingUSD",
+
+        COALESCE((
+          SELECT ROUND(("totalRaised" * 
+            COALESCE((SELECT "rate" 
+                      FROM "CurrencyExchangeRates" 
+                      WHERE "from" = ar."totalRaisedCurrency" 
+                        AND "to" = 'USD' 
+                      ORDER BY id DESC LIMIT 1), 1)
+          )::NUMERIC, 0)::INTEGER
+          FROM "AmountRaisedNonCrowdfunding" ar 
+          WHERE ar."id" = h."id" 
+          ORDER BY "totalRaised" DESC LIMIT 1
+        ), 0) AS "totalRaisedNonCrowdfundingUSD",
 
         COALESCE((
           SELECT ROUND(("totalDisbursed" * 

@@ -51,7 +51,7 @@ export function PricingTierCollapsible({
   const tier = tierData.tier;
 
   // Convert from cents to dollars for display
-  const formatPrice = (cents: number) => {
+  const formatAmount = (cents: number) => {
     // Ensure it's a valid number
     const validCents = isNaN(cents) ? 0 : cents;
     return (validCents / 100).toFixed(2);
@@ -87,7 +87,7 @@ export function PricingTierCollapsible({
                 Yearly cost (with yearly billing)
               </div>
               <div className="text-lg font-medium">
-                ${formatPrice(tierData.yearlyTotalCost)}
+                ${formatAmount(tierData.yearlyTotalCost)}
               </div>
             </div>
             <ChevronDown className="h-5 w-5 transition-transform ui-open:rotate-180" />
@@ -103,7 +103,7 @@ export function PricingTierCollapsible({
               <h5 className="font-medium text-gray-700">Plan Includes:</h5>
               <ul className="mt-2 space-y-1 text-sm text-gray-600">
                 <li>
-                  • Base price: ${formatPrice(tierData.baseMonthlyPrice)}/month
+                  • Base price: ${formatAmount(tierData.baseMonthlyPrice)}/month
                 </li>
                 <li>• {tier.includedCollectives} collectives included</li>
                 <li>
@@ -160,16 +160,16 @@ export function PricingTierCollapsible({
                           {formatNumber(month.collectives)}
                         </td>
                         <td className="text-right py-1">
-                          ${formatPrice(month.additionalCollectivesCost)}
+                          ${formatAmount(month.additionalCollectivesCost)}
                         </td>
                         <td className="text-right py-1">
                           {formatNumber(month.expenses)}
                         </td>
                         <td className="text-right py-1">
-                          ${formatPrice(month.additionalExpensesCost)}
+                          ${formatAmount(month.additionalExpensesCost)}
                         </td>
                         <td className="text-right py-1 font-medium">
-                          ${formatPrice(month.totalCost)}
+                          ${formatAmount(month.totalCost)}
                         </td>
                       </tr>
                     ))}
@@ -180,7 +180,7 @@ export function PricingTierCollapsible({
                         Monthly Average:
                       </td>
                       <td className="text-right py-1 font-medium">
-                        ${formatPrice(tierData.avgMonthlyCost)}
+                        ${formatAmount(tierData.avgMonthlyCost)}
                       </td>
                     </tr>
                     <tr>
@@ -188,7 +188,7 @@ export function PricingTierCollapsible({
                         Total yearly cost:
                       </td>
                       <td className="text-right py-1 font-medium">
-                        ${formatPrice(tierData.yearlyTotalCost)}
+                        ${formatAmount(tierData.yearlyTotalCost)}
                       </td>
                     </tr>
                   </tfoot>

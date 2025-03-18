@@ -4,6 +4,18 @@ import { CollectiveChart } from "@/components/ui/collective-chart";
 import { defaultTiers } from "@/lib/tiers";
 import { PricingTierCollapsible } from "@/components/PricingTierCollapsible";
 import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowUp, DollarSign, Users, Zap } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { calculateMetrics, formatAmount } from "@/lib/helpers";
 // This page can be statically generated at build time if you provide a list of slugs
 // via the generateStaticParams function, or it can be dynamically generated
 
@@ -22,25 +34,234 @@ export default async function CollectivePage({ params }: PageProps) {
   // Return not found for invalid slugs
   if (!collective) return notFound();
 
+  const metrics = calculateMetrics(collective);
+
   return (
-    <div className="py-24 sm:py-32 bg-muted">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Header section */}
-        <div className="mx-auto max-w-4xl text-center mb-12">
-          <h1 className="text-base font-semibold leading-7 text-blue-600">
-            Collective Details
-          </h1>
-          <p className="mt-2 text-4xl font-bold text-balance tracking-tight text-gray-900 sm:text-5xl">
+    <div className="">
+      <div className="@container relative mx-auto max-w-7xl">
+        <header className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             {collective.name}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Financial overview and platform comparison
           </p>
-          <p className="mt-6 text-balance text-lg leading-8 text-gray-600">
-            This page shows specific pricing details for the {collective.name}{" "}
-            collective.
-          </p>
+        </header>
+
+        <div className="grid gap-6 @md:grid-cols-2 @2xl:grid-cols-4 mb-10">
+          {/* Total Raised Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Raised
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatAmount(metrics.totalRaisedUSD)}
+              </div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <div className="w-full flex justify-between">
+                    <span>Crowdfunding</span>
+                    <span className="font-medium text-foreground">
+                      {formatAmount(metrics.totalRaisedCrowdfundingUSD)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <div className="w-full flex justify-between">
+                    <span>Non-crowdfunding</span>
+                    <span className="font-medium text-foreground">
+                      {formatAmount(metrics.totalRaisedNonCrowdfundingUSD)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Host Fees Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Host Fees
+              </CardTitle>
+              <ArrowUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatAmount(metrics.totalHostFeesUSD)}
+              </div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <div className="w-full flex justify-between">
+                    <span>Crowdfunding</span>
+                    <span className="font-medium text-foreground">
+                      {formatAmount(metrics.hostFeesCrowdfundingUSD)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <div className="w-full flex justify-between">
+                    <span>Non-crowdfunding</span>
+                    <span className="font-medium text-foreground">
+                      {formatAmount(metrics.hostFeesNonCrowdfundingUSD)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Collectives Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Collectives
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {metrics.totalCollectives}
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Active fundraising collectives on the platform
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Platform Tips Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Platform Tips
+              </CardTitle>
+              <Zap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">On</div>
+                <Badge className="bg-green-500 hover:bg-green-600">
+                  Active
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Optional contributions from donors
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
+        {/* Comparison Table */}
+        <div className="rounded-lg border bg-card shadow-sm">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Fee Comparison</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Before and after switching to Gift Collective platform
+            </p>
+
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[300px]">Fee Structure</TableHead>
+                    <TableHead className="text-right">Before</TableHead>
+                    <TableHead className="text-right">After</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      Platform fees
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Crowdfunding
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(
+                        metrics.fees.before.platformFeesOnCrowdfunding
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(
+                        metrics.fees.after.platformFeesOnCrowdfunding
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      Platform fees
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Non-crowdfunding
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(
+                        metrics.fees.before.platformFeesOnNonCrowdfunding
+                      )}
+                      <div className="text-xs text-muted-foreground mt-1">
+                        15% of host fees
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(
+                        metrics.fees.after.platformFeesOnNonCrowdfunding
+                      )}
+                      <div className="text-xs text-muted-foreground mt-1">
+                        0% of host fees
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Base Price</TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(metrics.fees.before.basePrice)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(metrics.fees.after.basePrice)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      Extra Collectives
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(metrics.fees.before.extraCollectives)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(metrics.fees.after.extraCollectives)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      Extra Expenses
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(metrics.fees.before.extraExpenses)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatAmount(metrics.fees.after.extraExpenses)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="border-t-2">
+                    <TableCell className="font-bold">Total</TableCell>
+                    <TableCell className="font-bold text-right">
+                      {formatAmount(metrics.fees.before.total)}
+                    </TableCell>
+                    <TableCell className="font-bold text-right">
+                      {formatAmount(metrics.fees.after.total)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
         {/* Stats cards */}
-        <div className="mx-auto max-w-4xl mb-12">
+        {/* <div className="mx-auto max-w-4xl mb-12">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg border border-gray-200 p-6 shadow-sm bg-white">
               <h3 className="text-lg font-semibold text-gray-900">Type</h3>
@@ -65,10 +286,10 @@ export default async function CollectivePage({ params }: PageProps) {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Yearly Plan Pricing Calculation based on this collective */}
-        <div className="mx-auto max-w-5xl mb-12">
+        {/* <div className="mx-auto max-w-5xl mb-12">
           <div className="rounded-lg border border-gray-200 p-6 shadow-sm bg-white">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Yearly Pricing Calculator for {collective.name}
@@ -213,16 +434,16 @@ export default async function CollectivePage({ params }: PageProps) {
               })()}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Chart section - Full width */}
-        <div className="mx-auto max-w-5xl">
+        {/* <div className="mx-auto max-w-5xl">
           <CollectiveChart
             collective={collective}
             title="Monthly Activity History"
             description="Number of active collectives and expenses over time"
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

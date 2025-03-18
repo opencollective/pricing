@@ -89,6 +89,12 @@ const featuresForTiers = {
 
 export { featuresForTiers, features };
 
+type TierChoice = {
+  type: TierType;
+  packageTitle?: string;
+  altPricingModel?: boolean;
+};
+
 export const altTiers: AltTier[] = [
   {
     type: TierType.FREE,
