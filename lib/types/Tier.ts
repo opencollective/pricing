@@ -1,3 +1,5 @@
+export type TierSet = "default" | "alt-display" | "alt-model";
+
 /**
  * Enum for tier types
  */
@@ -14,6 +16,12 @@ export enum PricingInterval {
   MONTHLY = "monthly",
   YEARLY = "yearly",
 }
+
+export type TierChoice = {
+  tierSet: TierSet;
+  title: string;
+  interval: PricingInterval;
+};
 
 export interface AltTier {
   type: TierType;
@@ -75,4 +83,32 @@ export interface Tier {
 
   /** Crowdfunding fee as a decimal (e.g., 0.05 for 5%) */
   crowdfundingFee: number;
+}
+
+export interface NewTier {
+  set: TierSet;
+  title: string;
+  pricingModel: {
+    /** The monthly price in the smallest currency unit (e.g., cents) */
+    pricePerMonth: number;
+
+    /** Number of collectives included in this tier */
+    includedCollectives: number;
+
+    /** Price for each additional collective beyond the included amount (monthly) */
+    pricePerAdditionalCollective: number;
+
+    /** Number of expenses included in this tier */
+    includedExpensesPerMonth: number;
+
+    /** Price for each additional expense beyond the included amount (monthly) */
+    pricePerAdditionalExpense: number;
+
+    crowdfundingFeePercent?: number;
+  };
+  features: {
+    [x: string]: boolean;
+  };
+  bgColor?: string;
+  className?: string;
 }

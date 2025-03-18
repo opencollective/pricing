@@ -7,7 +7,7 @@ import {
   featuresForTiers,
   features,
 } from "../../lib/tiers";
-import { PricingInterval, Tier, TierType } from "../../lib/types/Tier";
+import { PricingInterval, Tier, TierSet, TierType } from "../../lib/types/Tier";
 import { PricingTierColumn } from "../../components/PricingTierColumn";
 import { PricingFeatureCell } from "../../components/PricingFeatureCell";
 import Link from "next/link";
@@ -31,7 +31,6 @@ type AltTierPackage = {
 };
 
 // Create a context for plan state
-export type TierSet = "default" | "alt-display" | "alt-model";
 
 type PlanContextType = {
   expenses: number;
@@ -212,7 +211,6 @@ export default function LandingLayout({
           </div>
           <div className="grid grid-cols-12 py-24 gap-8">
             <div className="col-span-8">
-              {" "}
               {/* This is where the children (PlanFinder or Collective-specific content) will be rendered */}
               <PlanFinder
                 expenses={expenses}
@@ -711,7 +709,7 @@ export default function LandingLayout({
                 </div>
               </div>
             </div>
-            <div className="col-span-4 bg-muted rounded-xl p-6">{children}</div>
+            <div className="col-span-4">{children}</div>
           </div>
         </div>
       </div>

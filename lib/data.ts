@@ -17,7 +17,8 @@ export type Host = {
   type: "USER" | "ORGANIZATION" | "COLLECTIVE";
   hostFeePercent: number;
   totalCollectives: number;
-  totalActiveCollectives: number;
+  image?: string;
+  // totalActiveCollectives: number;
   // totalExpenses: number;
   monthlyExpenses: { month: string; count: number }[];
   monthlyActiveCollectives: { month: string; count: number }[];
@@ -280,22 +281,18 @@ export async function fetchDataFromDatabase() {
         GROUP BY h."id", t."hostCurrency"
       )
 
-      SELECT h."id", h."slug", h."name", h."type", h."hostFeePercent",
+      SELECT h."id", h."slug", h."name", h."type", h."hostFeePercent", h."image",
 
-        -- COALESCE((
-        --   SELECT COUNT(DISTINCT c."id")::INTEGER
-        --   FROM "Collectives" c
-        --   INNER JOIN "Transactions" t ON t."CollectiveId" = c."id" 
-        --     AND t."deletedAt" IS NOT NULL
-        --     AND t."createdAt" > '2024-01-01'
-        --     AND t."createdAt" < '2025-01-01'
-        --   WHERE c."HostCollectiveId" = h."id"
-        --     AND c."approvedAt" IS NOT NULL
-        --     AND c."deletedAt" IS NULL
-        --     AND c."ParentCollectiveId" IS NULL
-        --     AND c."HostCollectiveId" != c."id"
-        --   GROUP BY c."HostCollectiveId"
-        -- ), 0) AS "totalActiveCollectives",
+        COALESCE((
+          SELECT COUNT(DISTINCT c."id")::INTEGER
+          FROM "Collectives" c
+          WHERE c."HostCollectiveId" = h."id"
+            AND c."approvedAt" IS NOT NULL
+            AND c."deletedAt" IS NULL
+            AND c."ParentCollectiveId" IS NULL
+            AND c."HostCollectiveId" != c."id"
+          GROUP BY c."HostCollectiveId"
+        ), 0) AS "totalCollectives",
 
         -- COALESCE((
         --   SELECT COUNT(e."id")::INTEGER

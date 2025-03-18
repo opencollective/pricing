@@ -37,7 +37,7 @@ export default async function CollectivePage({ params }: PageProps) {
   const metrics = calculateMetrics(collective);
 
   return (
-    <div className="">
+    <div className="bg-muted rounded-xl p-6">
       <div className="@container relative mx-auto max-w-7xl">
         <header className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
@@ -119,7 +119,7 @@ export default async function CollectivePage({ params }: PageProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Collectives
+                Hosted Collectives
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -127,9 +127,9 @@ export default async function CollectivePage({ params }: PageProps) {
               <div className="text-2xl font-bold">
                 {metrics.totalCollectives}
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
+              {/* <p className="text-xs text-muted-foreground mt-3">
                 Active fundraising collectives on the platform
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -159,9 +159,9 @@ export default async function CollectivePage({ params }: PageProps) {
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Fee Comparison</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Before and after switching to Gift Collective platform
-            </p>
+            {/* <p className="text-sm text-muted-foreground mb-6">
+              Before and after switching to new pricing model
+            </p> */}
 
             <div className="overflow-x-auto">
               <Table>
