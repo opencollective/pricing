@@ -1,4 +1,4 @@
-export type TierSet = "default" | "alt-display" | "alt-model";
+export type TierSet = "default" | "alt-model";
 
 /**
  * Enum for tier types
@@ -17,9 +17,8 @@ export enum PricingInterval {
   YEARLY = "yearly",
 }
 
-export type TierChoice = {
-  tierSet: TierSet;
-  title: string;
+export type SelectedPlan = {
+  tier: NewTier | undefined;
   interval: PricingInterval;
 };
 
@@ -88,6 +87,7 @@ export interface Tier {
 export interface NewTier {
   set: TierSet;
   title: string;
+  type?: TierType;
   pricingModel: {
     /** The monthly price in the smallest currency unit (e.g., cents) */
     pricePerMonth: number;
@@ -110,5 +110,5 @@ export interface NewTier {
     [x: string]: boolean;
   };
   bgColor?: string;
-  className?: string;
+  fgColor?: string;
 }

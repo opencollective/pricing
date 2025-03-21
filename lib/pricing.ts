@@ -1,34 +1,41 @@
 /**
  * Function to calculate the best tier based on usage metrics
  */
-import { defaultTiers } from "./tiers";
-import { Tier } from "./types/Tier";
+import { NewTier } from "./types/Tier";
 
-export function calculateBestTier(expenses: number, collectives: number): Tier {
+export function calculateBestTier({
+  tiers,
+  usage: { expenses, collectives },
+}: {
+  tiers: NewTier[];
+  usage: { expenses: number; collectives: number };
+}): NewTier {
   // Calculate costs for all tiers to find the lowest cost one
-  const tierCosts = defaultTiers.map((tier) => {
+  const tierCosts = tiers.map((tier) => {
     // Calculate additional expenses cost
     const additionalExpenses = Math.max(
       0,
-      expenses - tier.includedExpensesPerMonth
+      expenses - tier.pricingModel.includedExpensesPerMonth
     );
     const additionalExpensesCost =
-      additionalExpenses * tier.pricePerAdditionalExpense;
+      additionalExpenses * tier.pricingModel.pricePerAdditionalExpense;
 
     // Calculate additional collectives cost
     const additionalCollectives = Math.max(
       0,
-      collectives - tier.includedCollectives
+      collectives - tier.pricingModel.includedCollectives
     );
     const additionalCollectivesCost =
-      additionalCollectives * tier.pricePerAdditionalCollective;
+      additionalCollectives * tier.pricingModel.pricePerAdditionalCollective;
 
     // Calculate crowdfunding fee if applicable
     // const crowdfundingFee = crowdfundingAmount * tier.crowdfundingFee;
 
     // Calculate monthly total cost
     const monthlyCost =
-      tier.pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
+      tier.pricingModel.pricePerMonth +
+      additionalExpensesCost +
+      additionalCollectivesCost;
 
     // Calculate yearly cost (with crowdfunding fee)
     // const yearlyCost = monthlyCost * 12 + crowdfundingFee;

@@ -1,32 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Slider } from "@/components/ui/slider";
-import { TierType } from "@/lib/types/Tier";
 import { defaultTiers } from "@/lib/tiers";
+import { usePricingContext } from "@/app/providers/PricingProvider";
 
-type PlanFinderProps = {
-  onExpensesChange?: (value: number) => void;
-  onCollectivesChange?: (value: number) => void;
-  initialExpenses?: number;
-  initialCollectives?: number;
-  expenses?: number;
-  collectives?: number;
-  setExpenses?: (value: number) => void;
-  setCollectives?: (value: number) => void;
-  selectedTierType?: TierType;
-};
-
-export function PlanFinder({
-  onExpensesChange,
-  onCollectivesChange,
-  initialExpenses = 25,
-  initialCollectives = 5,
-  expenses: controlledExpenses,
-  collectives: controlledCollectives,
-  setExpenses: controlledSetExpenses,
-  setCollectives: controlledSetCollectives,
-}: PlanFinderProps) {
+export function PlanFinder() {
+  const { expenses, collectives, setExpenses, setCollectives } =
+    usePricingContext();
   const expensesValues = [
     0,
     ...defaultTiers.map((tier) => tier.includedExpensesPerMonth),
@@ -37,19 +18,6 @@ export function PlanFinder({
     ...defaultTiers.map((tier) => tier.includedCollectives),
     5000,
   ];
-  // Use internal state only if not controlled by parent
-  const [internalExpenses, setInternalExpenses] =
-    useState<number>(initialExpenses);
-  const [internalCollectives, setInternalCollectives] =
-    useState<number>(initialCollectives);
-
-  // Use either controlled or internal values
-  const expenses =
-    controlledExpenses !== undefined ? controlledExpenses : internalExpenses;
-  const collectives =
-    controlledCollectives !== undefined
-      ? controlledCollectives
-      : internalCollectives;
 
   // Find the closest index in the predefined values array
   const findClosestValueIndex = (
@@ -80,26 +48,16 @@ export function PlanFinder({
   // Use either controlled or internal setters
   const handleExpensesChange = (index: number) => {
     const value = expensesValues[index];
-    if (controlledSetExpenses) {
-      controlledSetExpenses(value);
-    } else {
-      setInternalExpenses(value);
-    }
-    if (onExpensesChange) onExpensesChange(value);
+    setExpenses(value);
   };
 
   const handleCollectivesChange = (index: number) => {
     const value = collectivesValues[index];
-    if (controlledSetCollectives) {
-      controlledSetCollectives(value);
-    } else {
-      setInternalCollectives(value);
-    }
-    if (onCollectivesChange) onCollectivesChange(value);
+    setCollectives(value);
   };
 
   return (
-    <div className="mt-12 px-6 py-10 max-w-3xl mx-auto">
+    <div className="mt-8 px-6 py-10 pb-4 max-w-3xl mx-auto">
       <div className="space-y-8">
         <div>
           <div className="flex justify-between mb-2">

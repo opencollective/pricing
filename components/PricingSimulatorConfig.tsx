@@ -1,10 +1,9 @@
 import React from "react";
 import { cn } from "../lib/utils";
-import { usePlanContext } from "../app/(landing)/layout";
-import type { TierSet } from "../app/(landing)/layout";
-
+import { usePricingContext } from "@/app/providers/PricingProvider";
+import type { TierSet } from "@/lib/types/Tier";
 export default function PricingSimulatorConfig() {
-  const { tierSet, setTierSet } = usePlanContext();
+  const { tierSet, setTierSet } = usePricingContext();
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -28,9 +27,6 @@ export default function PricingSimulatorConfig() {
               className="w-full rounded-md border border-gray-200 p-2 text-sm"
             >
               <option value="default">Default (9 tiers)</option>
-              <option value="alt-display">
-                Alternative display (3 tier levels)
-              </option>
               <option value="alt-model">Alternative model (3 tiers)</option>
             </select>
           </div>

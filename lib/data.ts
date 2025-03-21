@@ -27,6 +27,7 @@ export type Host = {
   totalRaisedNonCrowdfundingUSD: number;
   totalDisbursedUSD: number;
   totalPlatformTips: number;
+  platformTips?: boolean;
 };
 
 // Helper function to check if DATABASE_URL is valid
@@ -282,6 +283,8 @@ export async function fetchDataFromDatabase() {
       )
 
       SELECT h."id", h."slug", h."name", h."type", h."hostFeePercent", h."image",
+
+        (h."data"->'plan'->>'platformTips')::boolean AS "platformTips",
 
         COALESCE((
           SELECT COUNT(DISTINCT c."id")::INTEGER

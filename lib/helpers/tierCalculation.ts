@@ -100,7 +100,7 @@ export const calculateBestTier = (
       // Additional collectives cost
       const additionalCollectives = Math.max(
         0,
-        host.totalActiveCollectives - tier.includedCollectives
+        host.totalCollectives - tier.includedCollectives
       );
       const additionalCollectivesCost =
         additionalCollectives * tier.pricePerAdditionalCollective;

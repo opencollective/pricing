@@ -114,6 +114,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Starter",
+    type: TierType.FREE,
     pricingModel: {
       pricePerMonth: 0,
       includedCollectives: 1,
@@ -126,6 +127,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Basic S",
+    type: TierType.BASIC,
     pricingModel: {
       pricePerMonth: 4900, // $49.00
       includedCollectives: 5,
@@ -138,6 +140,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Basic M",
+    type: TierType.BASIC,
     pricingModel: {
       pricePerMonth: 9900, // $99.00
       includedCollectives: 10,
@@ -150,6 +153,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Basic L",
+    type: TierType.BASIC,
     pricingModel: {
       pricePerMonth: 29900, // $299.00
       includedCollectives: 25,
@@ -162,6 +166,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Basic XL",
+    type: TierType.BASIC,
     pricingModel: {
       pricePerMonth: 49900, // $499.00
       includedCollectives: 50,
@@ -174,6 +179,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Pro S",
+    type: TierType.PRO,
     pricingModel: {
       pricePerMonth: 99900, // $999.00
       includedCollectives: 100,
@@ -186,6 +192,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Pro M",
+    type: TierType.PRO,
     pricingModel: {
       pricePerMonth: 249900, // $2499.00
       includedCollectives: 250,
@@ -198,6 +205,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Pro L",
+    type: TierType.PRO,
     pricingModel: {
       pricePerMonth: 499900, // $4999.00
       includedCollectives: 500,
@@ -210,6 +218,7 @@ export const newTiers: NewTier[] = [
   {
     set: "default",
     title: "Pro XL",
+    type: TierType.PRO,
     pricingModel: {
       pricePerMonth: 1999900, // $19999.00
       includedCollectives: 2500,
@@ -229,9 +238,9 @@ export const newTiers: NewTier[] = [
       pricePerAdditionalExpense: 199,
       pricePerAdditionalCollective: 999,
     },
-    features: featuresForBasic,
-    className: "text-blue-900 bg-blue-100",
+    features: featuresForStarter,
     bgColor: "rgb(222, 234, 254)",
+    fgColor: "rgb(28, 74, 144)",
   },
   {
     set: "alt-model",
@@ -244,8 +253,8 @@ export const newTiers: NewTier[] = [
       pricePerAdditionalCollective: 1099,
     },
     features: featuresForBasic,
-    className: "text-teal-900 bg-teal-100/50",
     bgColor: "rgb(223, 227, 222)",
+    fgColor: "rgb(28, 79, 74)",
   },
   {
     set: "alt-model",
@@ -257,9 +266,9 @@ export const newTiers: NewTier[] = [
       pricePerAdditionalExpense: 349,
       pricePerAdditionalCollective: 1199,
     },
-    features: featuresForBasic,
-    className: "text-orange-600 bg-orange-100/90",
+    features: featuresForPro,
     bgColor: "rgb(251, 235, 214)",
+    fgColor: "rgb(252, 103, 25)",
   },
 ];
 
