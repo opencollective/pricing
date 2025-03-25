@@ -86,7 +86,7 @@ export default function LandingLayout({
             we work together to create a fair and transparent funding model.
           </p>
         </div>
-        <div className="flex gap-12 justify-center">
+        <div className="flex gap-12 justify-center px-12">
           {/* Main content area */}
           <div className="flex-1 max-w-7xl">
             <div className="max-w-3xl mx-auto mt-16">

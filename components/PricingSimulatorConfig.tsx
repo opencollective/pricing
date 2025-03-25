@@ -1,37 +1,57 @@
 import React from "react";
-import { cn } from "../lib/utils";
 import { usePricingContext } from "@/app/providers/PricingProvider";
 import type { TierSet } from "@/lib/types/Tier";
+import { Settings } from "lucide-react";
+import { Button } from "./ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+
 export default function PricingSimulatorConfig() {
   const { tierSet, setTierSet } = usePricingContext();
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div
-        className={cn(
-          "w-64 rounded-lg border border-gray-200 bg-white shadow-lg"
-        )}
-      >
-        <div className="p-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="tier-set" className="text-sm font-medium">
-                Configuration
-              </label>
-              <span className="text-xs text-gray-500">Developer Options</span>
+    <div className="fixed top-4 right-4 z-50">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="icon" className="rounded-full">
+            <Settings className="h-4 w-4" />
+            <span className="sr-only">Open settings</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="tier-set">Configuration</Label>
+                <span className="text-xs text-muted-foreground">
+                  Developer Options
+                </span>
+              </div>
+              <Select
+                value={tierSet}
+                onValueChange={(value) => setTierSet(value as TierSet)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select tier set" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default (9 tiers)</SelectItem>
+                  <SelectItem value="alt-model">
+                    Alternative model (3 tiers)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <select
-              id="tier-set"
-              value={tierSet}
-              onChange={(e) => setTierSet(e.target.value as TierSet)}
-              className="w-full rounded-md border border-gray-200 p-2 text-sm"
-            >
-              <option value="default">Default (9 tiers)</option>
-              <option value="alt-model">Alternative model (3 tiers)</option>
-            </select>
           </div>
-        </div>
-      </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
