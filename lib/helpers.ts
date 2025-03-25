@@ -135,7 +135,10 @@ export function calculateFees({
 
 export function formatAmount(cents: number, decimals = 0) {
   const dollars = cents / 100;
-  if (dollars === 0) return "$0";
+  if (dollars === 0) {
+    console.log({ dollars });
+    return "$0";
+  }
 
   return new Intl.NumberFormat("en-US", {
     style: "currency",
