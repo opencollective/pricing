@@ -25,8 +25,12 @@ export function calculateFees({
   collective: Host;
   selectedPlan: SelectedPlan;
 }) {
-  const { platformTips, hostFeesCrowdfundingUSD, hostFeesNonCrowdfundingUSD } =
-    calculateMetrics(collective);
+  const {
+    platformTips,
+    totalRaisedCrowdfundingUSD,
+    hostFeesCrowdfundingUSD,
+    hostFeesNonCrowdfundingUSD,
+  } = calculateMetrics(collective);
 
   let afterBasePrice = selectedPlan.tier?.pricingModel.pricePerMonth || 0;
   if (selectedPlan.interval === PricingInterval.YEARLY) {
@@ -61,7 +65,7 @@ export function calculateFees({
 
   const platformFeesOnCrowdfunding = platformTips
     ? 0
-    : Math.round((hostFeesCrowdfundingUSD * 15) / 100);
+    : Math.round((totalRaisedCrowdfundingUSD * 5) / 100);
   const platformFeesOnNonCrowdfunding = Math.round(
     (hostFeesNonCrowdfundingUSD * 15) / 100
   );
@@ -95,7 +99,9 @@ export function calculateFees({
       extraExpensesCount: 0,
     },
     after: {
-      platformFeesOnCrowdfunding: 0, // adjust for OSC
+      platformFeesOnCrowdfunding: isMonthly
+        ? platformFeesOnCrowdfunding / 12
+        : platformFeesOnCrowdfunding,
       platformFeesOnNonCrowdfunding: 0, // adjust for OSC
       basePrice: isMonthly ? afterBasePrice / 12 : afterBasePrice, // calculate according to tier
       // basePriceExplanation

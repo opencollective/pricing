@@ -58,7 +58,9 @@ export function FeeComparison({ collective }: { collective: Host }) {
                   <TableCell className="font-medium">
                     Platform fees
                     <div className="text-xs text-muted-foreground mt-1">
-                      Crowdfunding
+                      {collective.platformTips
+                        ? "Crowdfunding"
+                        : "5% of total raised in crowdfunding"}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
