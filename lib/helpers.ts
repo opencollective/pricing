@@ -2,19 +2,13 @@ import { Host } from "./data";
 import { PricingInterval, SelectedPlan } from "./types/Tier";
 
 export function calculateMetrics(collective: Host) {
-  const hostFeesCrowdfundingUSD = Math.round(
-    (collective.totalRaisedCrowdfundingUSD * collective.hostFeePercent) / 100
-  );
-  const hostFeesNonCrowdfundingUSD = Math.round(
-    (collective.totalRaisedNonCrowdfundingUSD * collective.hostFeePercent) / 100
-  );
-  const totalHostFeesUSD = hostFeesCrowdfundingUSD + hostFeesNonCrowdfundingUSD;
-
+  const platformTips = collective.id !== 11004;
   return {
     ...collective,
-    hostFeesCrowdfundingUSD,
-    hostFeesNonCrowdfundingUSD,
-    totalHostFeesUSD,
+    hostFeesCrowdfundingUSD: collective.totalHostFeesCrowdfundingUSD,
+    hostFeesNonCrowdfundingUSD:
+      collective.totalHostFeesUSD - collective.totalHostFeesCrowdfundingUSD,
+    platformTips,
   };
 }
 
@@ -28,7 +22,6 @@ export function calculateFees({
   const {
     platformTips,
     totalRaisedCrowdfundingUSD,
-    hostFeesCrowdfundingUSD,
     hostFeesNonCrowdfundingUSD,
   } = calculateMetrics(collective);
 

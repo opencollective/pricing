@@ -28,6 +28,8 @@ export type Host = {
   totalDisbursedUSD: number;
   totalPlatformTips: number;
   platformTips?: boolean;
+  totalHostFeesUSD: number;
+  totalHostFeesCrowdfundingUSD: number;
 };
 
 // Helper function to check if DATABASE_URL is valid

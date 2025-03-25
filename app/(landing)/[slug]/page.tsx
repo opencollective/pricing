@@ -140,7 +140,7 @@ export default async function CollectivePage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  {collective.platformTips ? (
+                  {metrics.platformTips ? (
                     <>
                       <div className="text-2xl font-bold">On</div>
                       <Badge>Active</Badge>

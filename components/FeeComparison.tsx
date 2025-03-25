@@ -58,7 +58,7 @@ export function FeeComparison({ collective }: { collective: Host }) {
                   <TableCell className="font-medium">
                     Platform fees
                     <div className="text-xs text-muted-foreground mt-1">
-                      {collective.platformTips
+                      {fees.before.platformFeesOnCrowdfunding === 0
                         ? "Crowdfunding"
                         : "5% of total raised in crowdfunding"}
                     </div>
@@ -112,7 +112,7 @@ export function FeeComparison({ collective }: { collective: Host }) {
                   </TableCell>
                   <TableCell className="text-right">
                     {formatAmount(fees.before.extraCollectives)}
-                    {fees.before.extraCollectivesCount && (
+                    {fees.before.extraCollectivesCount > 0 && (
                       <div className="text-xs text-muted-foreground mt-1">
                         {fees.before.extraCollectivesCount} x{" "}
                         {formatAmount(
