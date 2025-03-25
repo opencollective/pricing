@@ -24,7 +24,6 @@ export default async function CollectivePage({ params }: PageProps) {
 
   // Return not found for invalid slugs
   if (!collective) return notFound();
-
   const metrics = calculateMetrics(collective);
 
   return (
@@ -141,8 +140,17 @@ export default async function CollectivePage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <div className="text-2xl font-bold">On</div>
-                  <Badge className="">Active</Badge>
+                  {collective.platformTips ? (
+                    <>
+                      <div className="text-2xl font-bold">On</div>
+                      <Badge>Active</Badge>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold">Off</div>
+                      <Badge variant="secondary">Disabled</Badge>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
