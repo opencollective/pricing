@@ -264,6 +264,40 @@ export async function fetchDataFromDatabase() {
         GROUP BY h."id", t1."hostCurrency"
       ),
 
+      "HostFees" AS (
+        SELECT h."id", COALESCE(SUM(t."amountInHostCurrency"), 0) as "totalHostFees", t."hostCurrency" as "totalHostFeesCurrency"
+        FROM "Transactions" t
+        INNER JOIN "Hosts" h ON h."id" = t."CollectiveId"
+        LEFT JOIN "Transactions" t2 ON t2."kind" = 'CONTRIBUTION'
+          AND t2."TransactionGroup" = t."TransactionGroup"
+          AND t2."deletedAt" IS NULL
+          AND t2."type" = 'CREDIT'
+        WHERE t."kind" = 'HOST_FEE'
+          AND t."type" = 'CREDIT'
+          AND t."deletedAt" IS NULL
+          AND t."createdAt" > ${queryStartDate}
+          AND t."createdAt" < ${queryEndDate}
+        GROUP BY h."id", t."hostCurrency"
+      ),
+
+      "HostFeesCrowdfunding" AS (
+        SELECT h."id", COALESCE(SUM(t."amountInHostCurrency"), 0) as "totalHostFees", t."hostCurrency" as "totalHostFeesCurrency"
+        FROM "Transactions" t
+        INNER JOIN "Hosts" h ON h."id" = t."CollectiveId"
+        LEFT JOIN "Transactions" t2 ON t2."kind" = 'CONTRIBUTION'
+          AND t2."TransactionGroup" = t."TransactionGroup"
+          AND t2."deletedAt" IS NULL
+          AND t2."type" = 'CREDIT'
+        LEFT JOIN "PaymentMethods" pm ON pm."id" = t2."PaymentMethodId"
+        WHERE t."kind" = 'HOST_FEE'
+          AND t."type" = 'CREDIT'
+          AND t."deletedAt" IS NULL
+          AND t."createdAt" > ${queryStartDate}
+          AND t."createdAt" < ${queryEndDate}
+        AND pm."service" IN ('stripe', 'paypal')
+        GROUP BY h."id", t."hostCurrency"
+      ),
+
       "PlatformTips" AS (
         SELECT h."id", COALESCE(SUM(t."amountInHostCurrency"), 0) AS "totalPlatformTips", 
               t."hostCurrency"
@@ -431,7 +465,49 @@ export async function fetchDataFromDatabase() {
           WHERE ar."id" = h."id" 
           ORDER BY "totalPlatformTips" DESC 
           LIMIT 1
-        ), 0) AS "totalPlatformTips"
+        ), 0) AS "totalPlatformTips",
+
+       -- COALESCE((
+       --   SELECT "totalHostFees"::INTEGER
+       --   FROM "HostFees" ar
+       --   WHERE ar."id" = h."id"
+       --   ORDER BY "totalHostFees" DESC
+       --   LIMIT 1
+       -- ), 0) AS "totalHostFees",
+
+       -- COALESCE((
+       --   SELECT "totalHostFees"::INTEGER
+       --   FROM "HostFeesCrowdfunding" ar
+       --   WHERE ar."id" = h."id"
+       --   ORDER BY "totalHostFees" DESC
+       --   LIMIT 1
+       -- ), 0) AS "totalHostFeesCrowdfunding",
+
+        COALESCE((
+          SELECT ROUND(("totalHostFees" *
+            COALESCE((SELECT "rate"
+                      FROM "CurrencyExchangeRates"
+                      WHERE "from" = ar."totalHostFeesCurrency"
+                        AND "to" = 'USD'
+                      ORDER BY id DESC LIMIT 1), 1)
+          )::NUMERIC, 0)::INTEGER
+          FROM "HostFees" ar
+          WHERE ar."id" = h."id"
+          ORDER BY "totalHostFees" DESC LIMIT 1
+        ), 0) AS "totalHostFeesUSD",
+
+        COALESCE((
+          SELECT ROUND(("totalHostFees" *
+            COALESCE((SELECT "rate"
+                      FROM "CurrencyExchangeRates"
+                      WHERE "from" = ar."totalHostFeesCurrency"
+                        AND "to" = 'USD'
+                      ORDER BY id DESC LIMIT 1), 1)
+          )::NUMERIC, 0)::INTEGER
+          FROM "HostFeesCrowdfunding" ar
+          WHERE ar."id" = h."id"
+          ORDER BY "totalHostFees" DESC LIMIT 1
+        ), 0) AS "totalHostFeesCrowdfundingUSD"
 
       FROM "Hosts" h`;
 
