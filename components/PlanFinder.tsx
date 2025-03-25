@@ -57,14 +57,11 @@ export function PlanFinder() {
   };
 
   return (
-    <div className="mt-8 px-6 py-10 pb-4 max-w-3xl mx-auto">
+    <div className="">
       <div className="space-y-8">
         <div>
           <div className="flex justify-between mb-2">
-            <label
-              htmlFor="expenses-slider"
-              className="font-medium text-gray-700"
-            >
+            <label htmlFor="expenses-slider" className="font-medium">
               How many expenses per month will you pay?
             </label>
             <span className="text-gray-600">{expenses} expenses per month</span>
@@ -85,10 +82,7 @@ export function PlanFinder() {
 
         <div>
           <div className="flex justify-between mb-2">
-            <label
-              htmlFor="collectives-slider"
-              className="font-medium text-gray-700"
-            >
+            <label htmlFor="collectives-slider" className="font-medium ">
               Will you host other collectives?
             </label>
             <span className="text-gray-600">

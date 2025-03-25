@@ -42,54 +42,61 @@ export default function LandingPage() {
 
   const total = basePrice + extraExpensesAmount + extraCollectivesAmount;
   return (
-    <Table>
-      <TableBody>
-        <TableRow>
-          <TableCell className="font-medium">
-            Base Price
-            <div className="text-xs text-muted-foreground mt-1">
-              {selectedPlan.tier.title}
-            </div>
-          </TableCell>
-          {}
-          <TableCell className="text-right">
-            {formatAmount(basePrice)}
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Extra Expenses</TableCell>
-          <TableCell className="text-right">
-            {formatAmount(extraExpensesAmount, 2)}
-            {extraExpensesPerMonth > 0 && (
+    <div>
+      <h4 className="text-lg font-semibold mb-2 px-2">Summary</h4>
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell className="font-medium">
+              Base Price
               <div className="text-xs text-muted-foreground mt-1">
-                {extraExpensesPerMonth} x{" "}
-                {formatAmount(pricePerAdditionalExpense, 2)}{" "}
-                {selectedPlan.interval === PricingInterval.YEARLY && <>x 12</>}
+                {selectedPlan.tier.title}
               </div>
-            )}
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Extra Collectives</TableCell>
-          <TableCell className="text-right">
-            {formatAmount(extraCollectivesAmount)}
-            {extraCollectivesPerMonth > 0 && (
-              <div className="text-xs text-muted-foreground mt-1">
-                {extraCollectivesPerMonth} x{" "}
-                {formatAmount(pricePerAdditionalCollective, 2)}{" "}
-                {selectedPlan.interval === PricingInterval.YEARLY && <>x 12</>}
-              </div>
-            )}
-          </TableCell>
-        </TableRow>
-        <TableRow className="border-t-2">
-          <TableCell className="font-semibold text-base">Total</TableCell>
-          <TableCell className="font-semibold text-right text-base">
-            {formatAmount(total, 0)}/
-            {selectedPlan.interval === PricingInterval.MONTHLY ? "mo" : "yr"}
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+            </TableCell>
+            {}
+            <TableCell className="text-right">
+              {formatAmount(basePrice)}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="font-medium">Extra Expenses</TableCell>
+            <TableCell className="text-right">
+              {formatAmount(extraExpensesAmount, 2)}
+              {extraExpensesPerMonth > 0 && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {extraExpensesPerMonth} x{" "}
+                  {formatAmount(pricePerAdditionalExpense, 2)}{" "}
+                  {selectedPlan.interval === PricingInterval.YEARLY && (
+                    <>x 12</>
+                  )}
+                </div>
+              )}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="font-medium">Extra Collectives</TableCell>
+            <TableCell className="text-right">
+              {formatAmount(extraCollectivesAmount)}
+              {extraCollectivesPerMonth > 0 && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {extraCollectivesPerMonth} x{" "}
+                  {formatAmount(pricePerAdditionalCollective, 2)}{" "}
+                  {selectedPlan.interval === PricingInterval.YEARLY && (
+                    <>x 12</>
+                  )}
+                </div>
+              )}
+            </TableCell>
+          </TableRow>
+          <TableRow className="border-t-2">
+            <TableCell className="font-semibold text-base">Total</TableCell>
+            <TableCell className="font-semibold text-right text-base">
+              {formatAmount(total, 0)}/
+              {selectedPlan.interval === PricingInterval.MONTHLY ? "mo" : "yr"}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   );
 }
