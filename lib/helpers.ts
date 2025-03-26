@@ -49,11 +49,11 @@ export function calculateFees({
       );
       return total + extraExpensesThisMonth;
     }, 0) || 0;
-
+  const afterExtraExpensesPerMonth = Math.floor(extraExpensesForFullYear / 12);
   // For collectives, just compare the total collectives with the included amount
-  const extraCollectivesForFullYear = Math.max(
+  const afterExtraCollectivesPerMonth = Math.max(
     0,
-    (collective.totalCollectives - includedCollectives) * 12
+    collective.totalCollectives - includedCollectives
   );
 
   const platformFeesOnCrowdfunding = platformTips
@@ -68,10 +68,17 @@ export function calculateFees({
   const beforeExtraCollectivesPrice = collective.id === 98478 ? 292 : 0; // adjustment for SCN
 
   const beforeExtraCollectivesCount =
-    (collective.id === 98478 ? collective.totalCollectives : 0) * 12;
+    collective.id === 98478 ? collective.totalCollectives : 0;
   const beforeExtraCollectivesAmount =
     beforeExtraCollectivesPrice * beforeExtraCollectivesCount;
 
+  const afterExtraCollectivesAmount =
+    afterExtraCollectivesPerMonth *
+    (selectedPlan.tier.pricingModel.pricePerAdditionalCollective || 0);
+
+  const afterExtraExpensesAmount =
+    afterExtraExpensesPerMonth *
+    (selectedPlan.tier.pricingModel.pricePerAdditionalExpense || 0);
   const fees = {
     before: {
       platformFeesOnCrowdfunding: isMonthly
@@ -81,15 +88,13 @@ export function calculateFees({
         ? platformFeesOnNonCrowdfunding / 12
         : platformFeesOnNonCrowdfunding,
       basePrice: 0,
-      extraCollectives: isMonthly
-        ? beforeExtraCollectivesAmount / 12
-        : beforeExtraCollectivesAmount,
-      extraCollectivesCount: isMonthly
-        ? beforeExtraCollectivesCount / 12
-        : beforeExtraCollectivesCount,
+      extraCollectivesAmount: isMonthly
+        ? beforeExtraCollectivesAmount
+        : beforeExtraCollectivesAmount * 12,
+      extraCollectivesPerMonth: beforeExtraCollectivesCount,
       pricePerAdditionalCollective: beforeExtraCollectivesPrice,
-      extraExpenses: 0,
-      extraExpensesCount: 0,
+      extraExpensesAmount: 0,
+      extraExpensesPerMonth: 0,
     },
     after: {
       platformFeesOnCrowdfunding: isMonthly
@@ -98,16 +103,18 @@ export function calculateFees({
       platformFeesOnNonCrowdfunding: 0, // adjust for OSC
       basePrice: isMonthly ? afterBasePrice / 12 : afterBasePrice, // calculate according to tier
       // basePriceExplanation
-      extraCollectives:
-        extraCollectivesForFullYear *
-        (selectedPlan.tier.pricingModel.pricePerAdditionalCollective || 0), // calculate according to tier
+      extraCollectivesAmount: isMonthly
+        ? afterExtraCollectivesAmount
+        : afterExtraCollectivesAmount * 12,
+      extraCollectivesPerMonth: afterExtraCollectivesPerMonth,
+
       // extra collectives explanation
-      extraExpenses:
-        extraExpensesForFullYear *
-        (selectedPlan.tier.pricingModel.pricePerAdditionalExpense || 0), // calculate according to tier
+      extraExpensesAmount: isMonthly
+        ? afterExtraExpensesAmount
+        : afterExtraExpensesAmount * 12,
+      // calculate according to tier
       // extra expenses explanation
-      extraCollectivesCount: extraCollectivesForFullYear,
-      extraExpensesCount: extraExpensesForFullYear,
+      extraExpensesPerMonth: afterExtraExpensesPerMonth,
     },
   };
   return {
@@ -117,8 +124,8 @@ export function calculateFees({
         fees.before.platformFeesOnCrowdfunding +
         fees.before.platformFeesOnNonCrowdfunding +
         fees.before.basePrice +
-        fees.before.extraCollectives +
-        fees.before.extraExpenses,
+        fees.before.extraCollectivesAmount +
+        fees.before.extraExpensesAmount,
     },
     after: {
       ...fees.after,
@@ -126,8 +133,8 @@ export function calculateFees({
         fees.after.platformFeesOnCrowdfunding +
         fees.after.platformFeesOnNonCrowdfunding +
         fees.after.basePrice +
-        fees.after.extraCollectives +
-        fees.after.extraExpenses,
+        fees.after.extraCollectivesAmount +
+        fees.after.extraExpensesAmount,
     },
   };
 }

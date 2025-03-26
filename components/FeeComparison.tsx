@@ -29,7 +29,9 @@ export function FeeComparison({ collective }: { collective: Host }) {
   }, [collective, setCollectives, setExpenses]);
 
   // calculate price
-
+  if (!selectedPlan.tier) {
+    return null;
+  }
   return (
     <div className="rounded-lg border bg-card shadow-sm">
       {fees && (
@@ -111,28 +113,54 @@ export function FeeComparison({ collective }: { collective: Host }) {
                     Extra Collectives
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatAmount(fees.before.extraCollectives)}
-                    {fees.before.extraCollectivesCount > 0 && (
+                    {formatAmount(fees.before.extraCollectivesAmount)}
+                    {fees.before.extraCollectivesPerMonth > 0 && (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {fees.before.extraCollectivesCount} x{" "}
+                        {fees.before.extraCollectivesPerMonth} x{" "}
                         {formatAmount(
                           fees.before.pricePerAdditionalCollective,
                           2
                         )}
+                        {selectedPlan.interval === PricingInterval.YEARLY &&
+                          " x 12"}
                       </div>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatAmount(fees.after.extraCollectives)}
+                    {formatAmount(fees.after.extraCollectivesAmount)}
+                    {fees.after.extraCollectivesPerMonth > 0 && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {fees.after.extraCollectivesPerMonth} x{" "}
+                        {formatAmount(
+                          selectedPlan.tier.pricingModel
+                            .pricePerAdditionalCollective,
+                          2
+                        )}
+                        {selectedPlan.interval === PricingInterval.YEARLY &&
+                          " x 12"}
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Extra Expenses</TableCell>
                   <TableCell className="text-right">
-                    {formatAmount(fees.before.extraExpenses)}
+                    {formatAmount(fees.before.extraExpensesAmount)}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatAmount(fees.after.extraExpenses)}
+                    {formatAmount(fees.after.extraExpensesAmount)}
+                    {fees.after.extraExpensesPerMonth > 0 && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {fees.after.extraExpensesPerMonth} x{" "}
+                        {formatAmount(
+                          selectedPlan.tier.pricingModel
+                            .pricePerAdditionalExpense,
+                          2
+                        )}
+                        {selectedPlan.interval === PricingInterval.YEARLY &&
+                          " x 12"}
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
                 <TableRow className="border-t-2">
