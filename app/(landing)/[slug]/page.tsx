@@ -358,7 +358,10 @@ export async function generateStaticParams() {
   const collectives = await fetchData();
 
   // Return an array of slug objects for each collective
-  return collectives.map((collective) => ({
-    slug: collective.slug,
-  }));
+  return [
+    { slug: "oce" },
+    ...collectives.map((collective) => ({
+      slug: collective.slug,
+    })),
+  ];
 }

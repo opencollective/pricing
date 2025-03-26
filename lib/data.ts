@@ -535,6 +535,10 @@ export async function fetchCollectiveBySlug(
 ): Promise<Host | null> {
   try {
     const data = await fetchData();
+
+    if (slug === "oce") {
+      return aggregateEurope(data);
+    }
     const collective = data.find((item) => item.slug === slug);
 
     if (!collective) {
@@ -547,4 +551,87 @@ export async function fetchCollectiveBySlug(
     console.error(`Error fetching collective with slug "${slug}":`, error);
     return null;
   }
+}
+
+// Function to aggregate Europe data
+function aggregateEurope(data: Host[]): Host | null {
+  const europe = data.find((item) => item.slug === "europe");
+  const foundationUSD = data.find((item) => item.slug === "oce-foundation-usd");
+  const foundationEUR = data.find((item) => item.slug === "oce-foundation-eur");
+
+  if (!europe) {
+    console.warn(`Collective with slug "europe" not found`);
+    return null;
+  }
+
+  function aggregateCollectives(collectives: (Host | undefined)[]) {
+    // Aggregate monthly expenses across all collectives
+    const allMonthlyExpenses = (collectives.filter(Boolean) as Host[]).reduce(
+      (acc, collective) => {
+        const expenses = collective.monthlyExpenses || [];
+        expenses.forEach(({ month, count }) => {
+          const existing = acc.find((e) => e.month === month);
+          if (existing) {
+            existing.count += count;
+          } else {
+            acc.push({ month, count });
+          }
+        });
+        return acc;
+      },
+      [] as { month: string; count: number }[]
+    );
+
+    // Aggregate other metrics
+    const aggregatedMetrics = (collectives.filter(Boolean) as Host[]).reduce(
+      (acc, collective) => ({
+        totalCollectives:
+          acc.totalCollectives + (collective.totalCollectives || 0),
+        totalRaisedUSD: acc.totalRaisedUSD + (collective.totalRaisedUSD || 0),
+        totalRaisedCrowdfundingUSD:
+          acc.totalRaisedCrowdfundingUSD +
+          (collective.totalRaisedCrowdfundingUSD || 0),
+        totalRaisedNonCrowdfundingUSD:
+          acc.totalRaisedNonCrowdfundingUSD +
+          (collective.totalRaisedNonCrowdfundingUSD || 0),
+        totalDisbursedUSD:
+          acc.totalDisbursedUSD + (collective.totalDisbursedUSD || 0),
+        totalPlatformTips:
+          acc.totalPlatformTips + (collective.totalPlatformTips || 0),
+        totalHostFeesUSD:
+          acc.totalHostFeesUSD + (collective.totalHostFeesUSD || 0),
+        totalHostFeesCrowdfundingUSD:
+          acc.totalHostFeesCrowdfundingUSD +
+          (collective.totalHostFeesCrowdfundingUSD || 0),
+      }),
+      {
+        totalCollectives: 0,
+        totalRaisedUSD: 0,
+        totalRaisedCrowdfundingUSD: 0,
+        totalRaisedNonCrowdfundingUSD: 0,
+        totalDisbursedUSD: 0,
+        totalPlatformTips: 0,
+        totalHostFeesUSD: 0,
+        totalHostFeesCrowdfundingUSD: 0,
+      }
+    );
+
+    return {
+      monthlyExpenses: allMonthlyExpenses,
+      ...aggregatedMetrics,
+    };
+  }
+
+  const aggregatedData = aggregateCollectives([
+    europe,
+    foundationUSD,
+    foundationEUR,
+  ]);
+
+  return {
+    ...europe,
+    slug: "oce",
+    name: "Open Collective Europe (aggregate)",
+    ...aggregatedData,
+  };
 }

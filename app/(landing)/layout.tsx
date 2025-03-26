@@ -355,11 +355,11 @@ export default function LandingLayout({
                                 key={`${tier.set}-${tier.title}-${feature}`}
                                 value={
                                   tier.features[feature] ? (
-                                    <div className="rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
+                                    <div className="mx-auto rounded-full flex justify-center items-center size-3.5 bg-primary text-white justify-self-center">
                                       <Check strokeWidth={3} size={10} />
                                     </div>
                                   ) : (
-                                    <div className="rounded-full flex justify-center items-center size-3.5 bg-gray-200 text-gray-400 justify-self-center">
+                                    <div className="mx-auto rounded-full flex justify-center items-center size-3.5 bg-gray-200 text-gray-400 justify-self-center">
                                       <X strokeWidth={3} size={10} />
                                     </div>
                                   )
