@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import PricingSimulatorConfig from "../../components/PricingSimulatorConfig";
 import { PlanFinder } from "@/components/PlanFinder";
 import { usePricingContext } from "../providers/PricingProvider";
+import { FinancialOutcomeWrapper } from "@/components/FinancialOutcomeWrapper";
 
 // Animated table row component using Framer Motion
 function AnimatedTableRow({
@@ -57,7 +58,7 @@ export default function LandingLayout({
     setSelectedPlan,
     recommendedTier,
   } = usePricingContext();
-  console.log({ selectedPlan, recommendedTier });
+
   const { interval } = selectedPlan;
 
   const [hoveredTier, setHoveredTier] = useState<string | null>(null);
@@ -407,11 +408,7 @@ export default function LandingLayout({
           </div>
 
           {/* Sticky card with children content */}
-          <div className="max-w-[650px] flex-1">
-            <div className="sticky top-8 bg-muted/75 rounded-2xl p-6 pt-8">
-              {children}
-            </div>
-          </div>
+          <div className="max-w-[650px] flex-1">{children}</div>
         </div>
       </div>
     </>
