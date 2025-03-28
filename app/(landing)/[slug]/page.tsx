@@ -27,7 +27,7 @@ export default async function CollectivePage({ params }: PageProps) {
   const metrics = calculateMetrics(collective);
 
   return (
-    <div>
+    <div className="bg-muted/75 rounded-2xl p-6 pt-8">
       <h2 className="mb-2.5 text-sm uppercase tracking-wide font-medium text-muted-foreground">
         Collective Data
       </h2>
