@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, createContext, useContext, useEffect } from "react";
-import { altTiers, newTiers } from "../../lib/tiers";
+import { newTiers } from "../../lib/tiers";
 import {
   NewTier,
   PricingInterval,
@@ -10,16 +10,6 @@ import {
   TierType,
 } from "../../lib/types/Tier";
 import { calculateBestTier } from "../../lib/pricing";
-
-// Define a package type for the alternative tiers
-type AltTierPackage = {
-  title: string;
-  pricePerMonth: number;
-  includedCollectives: number;
-  pricePerAdditionalCollective: number;
-  includedExpensesPerMonth: number;
-  pricePerAdditionalExpense: number;
-};
 
 // Create a context for plan state
 type PricingContextType = {
@@ -34,7 +24,6 @@ type PricingContextType = {
   setSelectedTierType: (value: TierType) => void;
   tierSet: TierSet;
   setTierSet: (value: TierSet) => void;
-  selectedPackagesForEachAltTier: Record<string, AltTierPackage>;
 };
 
 const PricingContext = createContext<PricingContextType | null>(null);
@@ -70,7 +59,7 @@ export function PricingProvider({
   const tiers = newTiers.filter((t) => t.set === tierSet);
 
   // Calculate the recommended plan based on the current values
-  const recommendedTier = calculateBestTier({
+  const { tier: recommendedTier } = calculateBestTier({
     tiers,
     usage: { expenses, collectives },
   });
@@ -85,48 +74,6 @@ export function PricingProvider({
   }, [recommendedTier, tierSet]);
 
   // Calculate the best package for each alternative tier based on usage
-  const selectedPackagesForEachAltTier = altTiers.reduce<
-    Record<string, AltTierPackage>
-  >((acc, tier) => {
-    // Calculate the total cost for each package in this tier
-    const packageCosts = tier.packages.map((pkg) => {
-      // Calculate additional expenses cost
-      const additionalExpenses = Math.max(
-        0,
-        expenses - pkg.includedExpensesPerMonth
-      );
-      const additionalExpensesCost =
-        additionalExpenses * pkg.pricePerAdditionalExpense;
-
-      // Calculate additional collectives cost
-      const additionalCollectives = Math.max(
-        0,
-        collectives - pkg.includedCollectives
-      );
-      const additionalCollectivesCost =
-        additionalCollectives * pkg.pricePerAdditionalCollective;
-
-      // Calculate total monthly cost
-      const totalMonthlyCost =
-        pkg.pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
-
-      return {
-        package: pkg,
-        totalMonthlyCost,
-      };
-    });
-
-    // Sort packages by total monthly cost to find the cheapest option
-    packageCosts.sort((a, b) => a.totalMonthlyCost - b.totalMonthlyCost);
-
-    // Get the package with the lowest total monthly cost
-    const bestPackage = packageCosts[0].package;
-
-    return {
-      ...acc,
-      [tier.type]: bestPackage,
-    };
-  }, {});
 
   // Create context value
   const contextValue = {
@@ -139,7 +86,6 @@ export function PricingProvider({
     setSelectedTierType,
     tierSet,
     setTierSet,
-    selectedPackagesForEachAltTier,
     selectedPlan,
     setSelectedPlan,
   };

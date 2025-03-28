@@ -9,7 +9,7 @@ export function calculateBestTier({
 }: {
   tiers: NewTier[];
   usage: { expenses: number; collectives: number };
-}): NewTier {
+}): { tier: NewTier; yearlyCost: number; monthlyCost: number } {
   // Calculate costs for all tiers to find the lowest cost one
   const tierCosts = tiers.map((tier) => {
     // Calculate additional expenses cost
@@ -38,17 +38,20 @@ export function calculateBestTier({
       additionalCollectivesCost;
 
     // Calculate yearly cost (with crowdfunding fee)
-    // const yearlyCost = monthlyCost * 12 + crowdfundingFee;
+    const yearlyCost =
+      tier.pricingModel.pricePerMonth * 10 +
+      (additionalExpensesCost + additionalCollectivesCost) * 12;
 
     return {
       tier,
       monthlyCost,
+      yearlyCost,
     };
   });
 
   // Sort tiers by yearly cost to find the cheapest option
-  tierCosts.sort((a, b) => a.monthlyCost - b.monthlyCost);
+  tierCosts.sort((a, b) => a.yearlyCost - b.yearlyCost);
 
   // Return the tier title with the lowest cost
-  return tierCosts[0].tier;
+  return tierCosts[0];
 }

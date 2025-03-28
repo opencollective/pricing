@@ -3,15 +3,47 @@
 import { fetchData } from "@/lib/data";
 import { FinancialOutcome } from "./FinancialOutcome";
 import { newTiers } from "@/lib/tiers";
+import { calculateMetrics } from "@/lib/helpers";
+import { calculateBestTier } from "@/lib/pricing";
+import { TierSet } from "@/lib/types/Tier";
 
-async function calculateProjectedRevenue() {
+async function calculateProjectedRevenue(tierSet: TierSet) {
   const collectives = await fetchData();
-  console.log("first", collectives[0]);
+  let totalFees = 0;
+  let totalPlatformTips = 0;
 
-  return { fees: 0, platformTips: 0, tierSummary: [] };
+  const tiers = newTiers.filter((tier) => tier.set === tierSet);
+
+  for (const collective of collectives) {
+    const metrics = calculateMetrics(collective);
+
+    const recommendedDefaultTier = calculateBestTier({
+      tiers: tiers,
+      usage: {
+        expenses: metrics.avgExpensesPerMonth,
+        collectives: metrics.totalCollectives,
+      },
+    });
+
+    totalPlatformTips += metrics.totalPlatformTips;
+    totalFees += recommendedDefaultTier.yearlyCost;
+  }
+  return {
+    fees: totalFees,
+    platformTips: totalPlatformTips,
+  };
 }
 
 export default async function FinancialOutcomeWrapper() {
-  const projectedRevenue = await calculateProjectedRevenue();
-  return <FinancialOutcome projectedRevenue={projectedRevenue} />;
+  const projectedRevenueDefault = await calculateProjectedRevenue("default");
+  const projectedRevenueAltModel = await calculateProjectedRevenue("alt-model");
+
+  return (
+    <FinancialOutcome
+      projectedRevenue={{
+        "alt-model": projectedRevenueAltModel,
+        default: projectedRevenueDefault,
+      }}
+    />
+  );
 }

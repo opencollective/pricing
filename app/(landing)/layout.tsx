@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import PricingSimulatorConfig from "../../components/PricingSimulatorConfig";
 import { PlanFinder } from "@/components/PlanFinder";
 import { usePricingContext } from "../providers/PricingProvider";
-import { FinancialOutcomeWrapper } from "@/components/FinancialOutcomeWrapper";
 
 // Animated table row component using Framer Motion
 function AnimatedTableRow({

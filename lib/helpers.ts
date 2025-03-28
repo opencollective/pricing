@@ -3,12 +3,18 @@ import { PricingInterval, SelectedPlan } from "./types/Tier";
 
 export function calculateMetrics(collective: Host) {
   const platformTips = collective.id !== 11004;
+
+  const avgExpensesPerMonth =
+    collective.monthlyExpenses?.reduce((total, month) => {
+      return total + month.count;
+    }, 0) / 12;
   return {
     ...collective,
     hostFeesCrowdfundingUSD: collective.totalHostFeesCrowdfundingUSD,
     hostFeesNonCrowdfundingUSD:
       collective.totalHostFeesUSD - collective.totalHostFeesCrowdfundingUSD,
     platformTips,
+    avgExpensesPerMonth,
   };
 }
 

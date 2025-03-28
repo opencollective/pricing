@@ -2,20 +2,21 @@
 
 import React from "react";
 import { Slider } from "@/components/ui/slider";
-import { defaultTiers } from "@/lib/tiers";
+import { newTiers } from "@/lib/tiers";
 import { usePricingContext } from "@/app/providers/PricingProvider";
 
+const defaultTiers = newTiers.filter((t) => t.set === "default");
 export function PlanFinder() {
   const { expenses, collectives, setExpenses, setCollectives } =
     usePricingContext();
   const expensesValues = [
     0,
-    ...defaultTiers.map((tier) => tier.includedExpensesPerMonth),
+    ...defaultTiers.map((tier) => tier.pricingModel.includedExpensesPerMonth),
     50000,
   ];
   const collectivesValues = [
     0,
-    ...defaultTiers.map((tier) => tier.includedCollectives),
+    ...defaultTiers.map((tier) => tier.pricingModel.includedCollectives),
     5000,
   ];
 

@@ -11,11 +11,8 @@ import {
   PaginationState,
   flexRender,
 } from "@tanstack/react-table";
-import {
-  calculateBestTier,
-  formatCurrency,
-} from "../lib/helpers/tierCalculation";
-import { defaultTiers } from "../lib/tiers";
+import { calculateBestTier } from "@/lib/pricing";
+import { newTiers } from "../lib/tiers";
 import {
   Table,
   TableHeader,
@@ -26,9 +23,22 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Host } from "../lib/data";
+import { calculateMetrics, formatAmount } from "@/lib/helpers";
 
 interface CollectivesTableProps {
   data: Host[];
+}
+const defaultTiers = newTiers.filter((t) => t.set === "default");
+
+function calculateBestDefaultTier(collective: Host) {
+  const metrics = calculateMetrics(collective);
+  return calculateBestTier({
+    tiers: defaultTiers,
+    usage: {
+      expenses: metrics.avgExpensesPerMonth,
+      collectives: metrics.totalCollectives,
+    },
+  });
 }
 
 export function CollectivesTable({ data }: CollectivesTableProps) {
@@ -45,7 +55,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
     // Initialize all tiers with zero counts and contributions
     const tierCounts: Record<string, number> = {};
     const tierContributions: Record<string, number> = {};
-
+    const defaultTiers = newTiers.filter((t) => t.set === "default");
     // Pre-populate with all tiers to preserve order and include zero-count tiers
     defaultTiers.forEach((tier) => {
       tierCounts[tier.title] = 0;
@@ -53,7 +63,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
     });
 
     data.forEach((collective) => {
-      const { tier, yearlyCost } = calculateBestTier(collective);
+      const { tier, yearlyCost } = calculateBestDefaultTier(collective);
       totalIncome += yearlyCost;
 
       // Count by tier title
@@ -134,7 +144,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         header: "Total crowdfunding (Past Year)",
         cell: (info) => {
           const value = info.getValue() as number;
-          return formatCurrency(value);
+          return formatAmount(value);
         },
         size: 180, // Fixed width in pixels
       },
@@ -142,7 +152,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         id: "bestTier",
         header: "Recommended Tier",
         accessorFn: (row) => {
-          const { tier } = calculateBestTier(row);
+          const { tier } = calculateBestDefaultTier(row);
           return tier.title;
         },
         cell: (info) => info.getValue(),
@@ -152,12 +162,12 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         id: "yearlyCost",
         header: "Yearly Cost",
         accessorFn: (row) => {
-          const { yearlyCost } = calculateBestTier(row);
+          const { yearlyCost } = calculateBestDefaultTier(row);
           return yearlyCost;
         },
         cell: (info) => {
           const yearlyCost = info.getValue() as number;
-          return formatCurrency(yearlyCost);
+          return formatAmount(yearlyCost);
         },
         size: 180, // Fixed width in pixels
       },
@@ -330,9 +340,8 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                         {summary.tierCounts[tier.title]}
                       </TableCell>
                       <TableCell className="px-3 py-2 text-sm text-right">
-                        {formatCurrency(
-                          summary.tierContributions[tier.title] || 0,
-                          summary.currency
+                        {formatAmount(
+                          summary.tierContributions[tier.title] || 0
                         )}
                       </TableCell>
                     </TableRow>
@@ -350,7 +359,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                       )}
                     </TableCell>
                     <TableCell className="px-3 py-2 text-sm font-medium text-right">
-                      {formatCurrency(summary.totalIncome, summary.currency)}
+                      {formatAmount(summary.totalIncome)}
                     </TableCell>
                   </TableRow>
                 </TableFooter>
