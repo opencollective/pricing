@@ -136,18 +136,24 @@ export default async function CollectivePage({ params }: PageProps) {
                 <CardTitle className="text-sm font-medium">
                   Platform Tips
                 </CardTitle>
-                <Zap className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Past 12 months
+                </span>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   {metrics.platformTips ? (
                     <>
-                      <div className="text-2xl font-bold">On</div>
+                      <div className="text-2xl font-bold">
+                        {formatAmount(metrics.totalPlatformTips)}
+                      </div>
                       <Badge>Active</Badge>
                     </>
                   ) : (
                     <>
-                      <div className="text-2xl font-bold">Off</div>
+                      <div className="text-2xl font-bold">
+                        {formatAmount(metrics.totalPlatformTips)}
+                      </div>
                       <Badge variant="secondary">Disabled</Badge>
                     </>
                   )}
