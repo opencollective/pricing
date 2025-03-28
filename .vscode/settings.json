@@ -1,0 +1,6 @@
+{
+  "tailwindCSS.experimental.configFile": "app/globals.css",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}
