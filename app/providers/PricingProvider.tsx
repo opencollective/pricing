@@ -24,6 +24,8 @@ type PricingContextType = {
   setSelectedTierType: (value: TierType) => void;
   tierSet: TierSet;
   setTierSet: (value: TierSet) => void;
+  showTotalPrice: boolean;
+  setShowTotalPrice: (val: boolean) => void;
 };
 
 const PricingContext = createContext<PricingContextType | null>(null);
@@ -46,6 +48,8 @@ export function PricingProvider({
     TierType.BASIC
   );
   const [tierSet, setTierSet] = useState<TierSet>("default");
+  const [showTotalPrice, setShowTotalPrice] = useState<boolean>(false);
+
   const [selectedPlan, setSelectedPlan] = useState<SelectedPlan>({
     tier: undefined,
     interval: PricingInterval.MONTHLY,
@@ -88,6 +92,8 @@ export function PricingProvider({
     setTierSet,
     selectedPlan,
     setSelectedPlan,
+    showTotalPrice,
+    setShowTotalPrice,
   };
 
   return (

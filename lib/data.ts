@@ -520,8 +520,6 @@ export async function fetchDataFromDatabase() {
     const executionTimeInSeconds = ((endTime - startTime) / 1000).toFixed(2);
     console.log(`Query executed in ${executionTimeInSeconds} seconds`);
 
-    console.log(rows);
-
     return rows;
   } catch (error) {
     console.error("Database Error:", error);

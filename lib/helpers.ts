@@ -171,7 +171,6 @@ export function calculateFees({
 export function formatAmount(cents: number, decimals = 0) {
   const dollars = cents / 100;
   if (dollars === 0) {
-    console.log({ dollars });
     return "$0";
   }
 

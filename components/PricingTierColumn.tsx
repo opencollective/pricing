@@ -21,50 +21,53 @@ export function PricingTierColumn({
   isHovered = false,
   onHover,
 }: PricingTierColumnProps) {
-  // const { expenses, collectives } = usePricingContext();
   // Format price as dollars with proper formatting
   const {
     title,
     pricingModel: {
       pricePerMonth,
-      // includedExpensesPerMonth,
-      // pricePerAdditionalExpense,
-      // includedCollectives,
-      // pricePerAdditionalCollective,
+      includedExpensesPerMonth,
+      pricePerAdditionalExpense,
+      includedCollectives,
+      pricePerAdditionalCollective,
     },
     bgColor,
     fgColor,
   } = tier;
-  const price =
+  const basePrice =
     interval === PricingInterval.MONTHLY ? pricePerMonth : pricePerMonth * 10;
 
   // Calculate total price based on usage if provided
   // const totalPrice = expenses || collectives ? calculateTotalPrice() : price;
 
-  const { selectedPlan } = usePricingContext();
-  // function calculateTotalPrice() {
-  //   // Calculate additional expenses cost
-  //   const additionalExpenses = Math.max(0, expenses - includedExpensesPerMonth);
-  //   const additionalExpensesCost =
-  //     additionalExpenses * pricePerAdditionalExpense;
+  const { selectedPlan, showTotalPrice, expenses, collectives } =
+    usePricingContext();
 
-  //   // Calculate additional collectives cost
-  //   const additionalCollectives = Math.max(
-  //     0,
-  //     collectives - includedCollectives
-  //   );
-  //   const additionalCollectivesCost =
-  //     additionalCollectives * pricePerAdditionalCollective;
+  function calculateTotalPrice() {
+    // Calculate additional expenses cost
+    const additionalExpenses = Math.max(0, expenses - includedExpensesPerMonth);
+    const additionalExpensesCost =
+      additionalExpenses * pricePerAdditionalExpense;
 
-  //   // Calculate total monthly cost
-  //   const monthlyCost =
-  //     pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
+    // Calculate additional collectives cost
+    const additionalCollectives = Math.max(
+      0,
+      collectives - includedCollectives
+    );
+    const additionalCollectivesCost =
+      additionalCollectives * pricePerAdditionalCollective;
 
-  //   // Return monthly or yearly based on selected interval
-  //   return interval === PricingInterval.MONTHLY
-  //     ? monthlyCost
-  //     : monthlyCost * 10; // Apply the same yearly discount as the base price
-  // }
+    // Calculate total monthly cost
+    const monthlyCost =
+      pricePerMonth + additionalExpensesCost + additionalCollectivesCost;
+
+    // Return monthly or yearly based on selected interval
+    return interval === PricingInterval.MONTHLY
+      ? monthlyCost
+      : monthlyCost * 10; // Apply the same yearly discount as the base price
+  }
+
+  const price = showTotalPrice ? calculateTotalPrice() : basePrice;
 
   // Create a ref for the radio input
   const radioRef = React.useRef<HTMLButtonElement>(null);
@@ -121,9 +124,12 @@ export function PricingTierColumn({
               {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
             </span>
           </div>
-          <span className="text-muted-foreground text-sm font-normal">
-            Base price
-          </span>
+          {!showTotalPrice && (
+            <span className="text-muted-foreground text-sm font-normal">
+              Base price
+            </span>
+          )}
+
           {/* <div
             className={`mt-1 font-normal text-sm  ${
               fgColor ? "" : "text-gray-500"

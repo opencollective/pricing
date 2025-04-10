@@ -12,9 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Switch } from "./ui/switch";
 
 export default function PricingSimulatorConfig() {
-  const { tierSet, setTierSet } = usePricingContext();
+  const { tierSet, setTierSet, showTotalPrice, setShowTotalPrice } =
+    usePricingContext();
 
   return (
     <div className="fixed top-4 right-4 z-50">
@@ -29,10 +31,7 @@ export default function PricingSimulatorConfig() {
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="tier-set">Configuration</Label>
-                <span className="text-xs text-muted-foreground">
-                  Developer Options
-                </span>
+                <Label htmlFor="tier-set">Tier set</Label>
               </div>
               <Select
                 value={tierSet}
@@ -48,6 +47,16 @@ export default function PricingSimulatorConfig() {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={showTotalPrice}
+                onCheckedChange={setShowTotalPrice}
+                id="total-price"
+              />
+              <Label htmlFor="total-price">
+                Show total price in tier cards
+              </Label>
             </div>
           </div>
         </PopoverContent>
