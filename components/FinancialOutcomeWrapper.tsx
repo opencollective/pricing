@@ -35,9 +35,9 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
     if (fees) {
       // will always be true since we're providing plan above
       totalFeesBefore += fees.before.total * 12; // since we're using monthly pricing
+      totalFees += fees.after.total * 12;
     }
     totalPlatformTips += metrics.totalPlatformTips;
-    totalFees += recommendedDefaultTier.yearlyCost;
   }
   return {
     before: {
