@@ -36,7 +36,7 @@ function calculateBestDefaultTier(collective: Host) {
     tiers: defaultTiers,
     usage: {
       expenses: metrics.avgExpensesPerMonth,
-      collectives: metrics.totalCollectives,
+      collectives: metrics.avgActiveCollectivesPerMonth,
     },
   });
 }

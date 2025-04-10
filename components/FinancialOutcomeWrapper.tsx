@@ -21,7 +21,7 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
       tiers: tiers,
       usage: {
         expenses: metrics.avgExpensesPerMonth,
-        collectives: metrics.totalCollectives,
+        collectives: metrics.avgActiveCollectivesPerMonth,
       },
     });
     const fees = calculateFees({
@@ -48,8 +48,6 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
       fees: totalFees,
       platformTips: totalPlatformTips,
     },
-    fees: totalFees,
-    platformTips: totalPlatformTips,
   };
 }
 

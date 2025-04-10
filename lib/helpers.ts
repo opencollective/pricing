@@ -4,10 +4,17 @@ import { PricingInterval, SelectedPlan } from "./types/Tier";
 export function calculateMetrics(collective: Host) {
   const platformTips = collective.id !== 11004;
 
-  const avgExpensesPerMonth =
+  const avgExpensesPerMonth = Math.round(
     collective.monthlyExpenses?.reduce((total, month) => {
       return total + month.count;
-    }, 0) / 12;
+    }, 0) / 12
+  );
+
+  const avgActiveCollectivesPerMonth = Math.round(
+    collective.monthlyActiveCollectives?.reduce((total, month) => {
+      return total + month.count;
+    }, 0) / 12
+  );
   return {
     ...collective,
     hostFeesCrowdfundingUSD: collective.totalHostFeesCrowdfundingUSD,
@@ -15,6 +22,7 @@ export function calculateMetrics(collective: Host) {
       collective.totalHostFeesUSD - collective.totalHostFeesCrowdfundingUSD,
     platformTips,
     avgExpensesPerMonth,
+    avgActiveCollectivesPerMonth,
   };
 }
 
@@ -55,12 +63,27 @@ export function calculateFees({
       );
       return total + extraExpensesThisMonth;
     }, 0) || 0;
-  const afterExtraExpensesPerMonth = Math.floor(extraExpensesForFullYear / 12);
-  // For collectives, just compare the total collectives with the included amount
-  const afterExtraCollectivesPerMonth = Math.max(
-    0,
-    collective.totalCollectives - includedCollectives
+
+  const afterExtraExpensesPerMonth = Math.round(extraExpensesForFullYear / 12);
+
+  const extraCollectivesForFullYear =
+    collective.monthlyActiveCollectives?.reduce((total, month) => {
+      // For each month, calculate how many expenses exceed the included amount
+      const extraCollectivesThisMonth = Math.max(
+        0,
+        month.count - includedCollectives
+      );
+      return total + extraCollectivesThisMonth;
+    }, 0) || 0;
+
+  const afterExtraCollectivesPerMonth = Math.round(
+    extraCollectivesForFullYear / 12
   );
+
+  // const afterExtraCollectivesPerMonth = Math.max(
+  //   0,
+  //   collective.totalCollectives - includedCollectives
+  // );
 
   const platformFeesOnCrowdfunding = platformTips
     ? 0

@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { calculateFees, formatAmount } from "@/lib/helpers";
+import { calculateFees, calculateMetrics, formatAmount } from "@/lib/helpers";
 import { usePricingContext } from "@/app/providers/PricingProvider";
 import { Host } from "@/lib/data";
 import { PricingInterval } from "@/lib/types/Tier";
@@ -16,17 +16,14 @@ import { PricingInterval } from "@/lib/types/Tier";
 export function FeeComparison({ collective }: { collective: Host }) {
   const { setCollectives, setExpenses, selectedPlan } = usePricingContext();
   const fees = calculateFees({ collective, selectedPlan }); // add price calculation, based on selected plan
-
+  const metrics = calculateMetrics(collective);
   useEffect(() => {
     // Set the values using properties directly from the Host type
-    setCollectives(collective.totalCollectives);
+    setCollectives(metrics.avgActiveCollectivesPerMonth);
     // Get the monthly expense number that is highest among the months
-    const maxMonthlyExpenses =
-      collective.monthlyExpenses && collective.monthlyExpenses.length > 0
-        ? Math.max(...collective.monthlyExpenses.map((month) => month.count))
-        : 0;
-    setExpenses(maxMonthlyExpenses);
-  }, [collective, setCollectives, setExpenses]);
+
+    setExpenses(metrics.avgExpensesPerMonth);
+  }, [metrics, setCollectives, setExpenses]);
 
   // calculate price
   if (!selectedPlan.tier) {

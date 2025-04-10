@@ -126,6 +126,16 @@ export default async function CollectivePage({ params }: PageProps) {
                   <div className="text-2xl font-bold">
                     {metrics.totalCollectives}
                   </div>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <div className="w-full flex justify-between">
+                        <span>Avg. active per month</span>
+                        <span className="font-medium text-foreground">
+                          {metrics.avgActiveCollectivesPerMonth}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 

@@ -18,8 +18,6 @@ export function FinancialOutcome({
   projectedRevenue: Record<
     TierSet,
     {
-      fees: number;
-      platformTips: number;
       before: {
         fees: number;
         platformTips: number;
