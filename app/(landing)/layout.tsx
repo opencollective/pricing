@@ -234,13 +234,13 @@ export default function LandingLayout({
                           </td>
                         </tr>
 
-                        {/* Included Collectives */}
+                        {/* Included Active Collectives */}
                         <AnimatedTableRow show={overviewOpen}>
                           <th
                             scope="row"
                             className="px-6 py-4 text-sm font-medium text-gray-900 text-left w-[250px] max-w-[250px]"
                           >
-                            Included Collectives
+                            Included Active Collectives
                           </th>
                           {visibleTiers.map((tier) => (
                             <PricingFeatureCell
