@@ -580,6 +580,23 @@ function aggregateEurope(data: Host[]): Host | null {
       [] as { month: string; count: number }[]
     );
 
+    // Aggregate monthly active collectives across all collectives
+    const allMonthlyActiveCollectives = (
+      collectives.filter(Boolean) as Host[]
+    ).reduce((acc, collective) => {
+      const monthlyActiveCollectives =
+        collective.monthlyActiveCollectives || [];
+      monthlyActiveCollectives.forEach(({ month, count }) => {
+        const existing = acc.find((e) => e.month === month);
+        if (existing) {
+          existing.count += count;
+        } else {
+          acc.push({ month, count });
+        }
+      });
+      return acc;
+    }, [] as { month: string; count: number }[]);
+
     // Aggregate other metrics
     const aggregatedMetrics = (collectives.filter(Boolean) as Host[]).reduce(
       (acc, collective) => ({
@@ -616,6 +633,7 @@ function aggregateEurope(data: Host[]): Host | null {
 
     return {
       monthlyExpenses: allMonthlyExpenses,
+      monthlyActiveCollectives: allMonthlyActiveCollectives,
       ...aggregatedMetrics,
     };
   }
