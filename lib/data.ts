@@ -552,14 +552,13 @@ export async function fetchCollectiveBySlug(
 }
 
 // Function to aggregate Europe data
-function aggregateEurope(data: Host[]): Host | null {
+export function aggregateEurope(data: Host[]): Host {
   const europe = data.find((item) => item.slug === "europe");
   const foundationUSD = data.find((item) => item.slug === "oce-foundation-usd");
   const foundationEUR = data.find((item) => item.slug === "oce-foundation-eur");
 
   if (!europe) {
-    console.warn(`Collective with slug "europe" not found`);
-    return null;
+    throw Error("Collective with slug europe not found");
   }
 
   function aggregateCollectives(collectives: (Host | undefined)[]) {

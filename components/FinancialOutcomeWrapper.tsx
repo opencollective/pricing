@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchData } from "@/lib/data";
+import { aggregateEurope, fetchData } from "@/lib/data";
 import { FinancialOutcome } from "./FinancialOutcome";
 import { newTiers } from "@/lib/tiers";
 import { calculateFees, calculateMetrics } from "@/lib/helpers";
@@ -14,7 +14,16 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
   let totalFeesBefore = 0;
   const tiers = newTiers.filter((tier) => tier.set === tierSet);
 
-  for (const collective of collectives) {
+  for (let collective of collectives) {
+    // Special case for OCE, to only use the aggregate of all their 3 accounts in the calculation
+    if (collective.slug === "europe") {
+      collective = aggregateEurope(collectives);
+    } else if (
+      ["oce-foundation-usd", "oce-foundation-eur"].includes(collective.slug)
+    ) {
+      continue;
+    }
+
     const metrics = calculateMetrics(collective);
 
     const recommendedDefaultTier = calculateBestTier({
