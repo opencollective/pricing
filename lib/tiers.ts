@@ -118,9 +118,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 0,
       includedCollectives: 1,
-      pricePerAdditionalCollective: 2499, // $24.99
+      pricePerAdditionalCollective: 1999, // $19.99
       includedExpensesPerMonth: 5,
-      pricePerAdditionalExpense: 299, // $2.99
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForStarter,
   },
@@ -131,9 +131,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 4900, // $49.00
       includedCollectives: 3,
-      pricePerAdditionalCollective: 2399, // 23.99
+      pricePerAdditionalCollective: 1999, // $19.99
       includedExpensesPerMonth: 25,
-      pricePerAdditionalExpense: 289, // $2.89
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForBasic,
   },
@@ -144,9 +144,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 9900, // $99.00
       includedCollectives: 5,
-      pricePerAdditionalCollective: 2299, // 22.99
+      pricePerAdditionalCollective: 1999, // $19.99
       includedExpensesPerMonth: 50,
-      pricePerAdditionalExpense: 279, // $2.79
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForBasic,
   },
@@ -157,9 +157,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 19900, // $199.00
       includedCollectives: 10,
-      pricePerAdditionalCollective: 2199, // $21.99
+      pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 100,
-      pricePerAdditionalExpense: 269, // $2.69
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForBasic,
   },
@@ -170,9 +170,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 49900, // $499.00
       includedCollectives: 25,
-      pricePerAdditionalCollective: 2099, // $20.99
+      pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 250,
-      pricePerAdditionalExpense: 259, // $2.59
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForBasic,
   },
@@ -183,9 +183,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 99900, // $999.00
       includedCollectives: 50,
-      pricePerAdditionalCollective: 1999, // $19.99
+      pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 500,
-      pricePerAdditionalExpense: 239, // $2.39
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForPro,
   },
@@ -196,9 +196,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 199900, // $1999.00
       includedCollectives: 100,
-      pricePerAdditionalCollective: 1899, // $18.99
+      pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 1000,
-      pricePerAdditionalExpense: 219, // $2.19
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForPro,
   },
@@ -209,7 +209,7 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 499900, // $4999.00
       includedCollectives: 250,
-      pricePerAdditionalCollective: 1799, // $17.99
+      pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 2500,
       pricePerAdditionalExpense: 199, // $1.99
     },
@@ -222,9 +222,9 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 1999900, // $19999.00
       includedCollectives: 1000,
-      pricePerAdditionalCollective: 1699, // $16.99
+      pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 10000,
-      pricePerAdditionalExpense: 179, // $1.79
+      pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForPro,
   },
