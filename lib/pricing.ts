@@ -1,17 +1,23 @@
 /**
  * Function to calculate the best tier based on usage metrics
  */
-import { NewTier } from "./types/Tier";
+import { NewTier, TierType } from "./types/Tier";
 
 export function calculateBestTier({
   tiers,
-  usage: { expenses, collectives },
+  usage: { expenses, collectives, automatedPayouts, taxForms },
 }: {
   tiers: NewTier[];
-  usage: { expenses: number; collectives: number };
+  usage: { expenses: number; collectives: number; automatedPayouts: boolean; taxForms: boolean };
 }): { tier: NewTier; yearlyCost: number; monthlyCost: number } {
   // Calculate costs for all tiers to find the lowest cost one
-  const tierCosts = tiers.map((tier) => {
+
+  const tierCosts = tiers
+
+    // Filter based on necessary features
+    .filter((tier) => taxForms ? tier.type === TierType.PRO : (automatedPayouts ? tier.type !== TierType.FREE : true))
+
+    .map((tier) => {
     // Calculate additional expenses cost
     const additionalExpenses = Math.max(
       0,

@@ -14,7 +14,7 @@ import { Host } from "@/lib/data";
 import { PricingInterval } from "@/lib/types/Tier";
 
 export function FeeComparison({ collective }: { collective: Host }) {
-  const { setCollectives, setExpenses, selectedPlan } = usePricingContext();
+  const { setCollectives, setExpenses, setAutomatedPayouts, setTaxForms, selectedPlan } = usePricingContext();
   const fees = calculateFees({ collective, selectedPlan }); // add price calculation, based on selected plan
   const metrics = calculateMetrics(collective);
   useEffect(() => {
@@ -23,6 +23,10 @@ export function FeeComparison({ collective }: { collective: Host }) {
     // Get the monthly expense number that is highest among the months
 
     setExpenses(metrics.avgExpensesPerMonth);
+
+    setAutomatedPayouts(collective.automatedPayouts);
+    setTaxForms(collective.taxForms);
+
   }, [metrics, setCollectives, setExpenses]);
 
   // calculate price

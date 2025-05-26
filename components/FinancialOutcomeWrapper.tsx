@@ -12,6 +12,14 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
   let totalFees = 0;
   let totalPlatformTips = 0;
   let totalFeesBefore = 0;
+
+  let totalPlatformFeesOnCrowdfundingBefore = 0;
+  let totalPlatformFeesOnNonCrowdfundingBefore = 0;
+  let totalPlatformFeesOnCrowdfunding = 0;
+  const totalPlatformFeesOnNonCrowdfunding = 0;
+  let totalHostPlansBefore = 0;
+  let totalHostPlans = 0;
+
   const tiers = newTiers.filter((tier) => tier.set === tierSet);
 
   for (let collective of collectives) {
@@ -31,6 +39,8 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
       usage: {
         expenses: metrics.avgExpensesPerMonth,
         collectives: metrics.avgActiveCollectivesPerMonth,
+        automatedPayouts: collective.automatedPayouts,
+        taxForms: collective.taxForms
       },
     });
     const fees = calculateFees({
@@ -45,17 +55,29 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
       // will always be true since we're providing plan above
       totalFeesBefore += fees.before.total * 12; // since we're using monthly pricing
       totalFees += fees.after.total * 12;
+      // breakdown
+      totalPlatformFeesOnCrowdfundingBefore += fees.before.platformFeesOnCrowdfunding * 12;
+      totalPlatformFeesOnNonCrowdfundingBefore += fees.before.platformFeesOnNonCrowdfunding * 12;
+      totalPlatformFeesOnCrowdfunding += fees.after.platformFeesOnCrowdfunding * 12;
+      totalHostPlansBefore += fees.before.totalHostPlans * 12;
+      totalHostPlans += fees.after.totalHostPlans * 12;
     }
     totalPlatformTips += metrics.totalPlatformTips;
   }
   return {
     before: {
+      platformFeesOnCrowdfunding: totalPlatformFeesOnCrowdfundingBefore,
+      platformFeesOnNonCrowdfunding: totalPlatformFeesOnNonCrowdfundingBefore,
       fees: totalFeesBefore,
       platformTips: totalPlatformTips,
+      hostPlans: totalHostPlansBefore,
     },
     after: {
+      platformFeesOnCrowdfunding: totalPlatformFeesOnCrowdfunding,
+      platformFeesOnNonCrowdfunding: totalPlatformFeesOnNonCrowdfunding,
       fees: totalFees,
       platformTips: totalPlatformTips,
+      hostPlans: totalHostPlans,
     },
   };
 }
