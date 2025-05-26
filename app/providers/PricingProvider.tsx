@@ -19,6 +19,8 @@ type PricingContextType = {
   setCollectives: (value: number) => void;
   automatedPayouts: boolean;
   setAutomatedPayouts: (value: boolean) => void;
+  taxForms: boolean;
+  setTaxForms: (value: boolean) => void;
   recommendedTier: NewTier;
   selectedPlan: SelectedPlan;
   setSelectedPlan: React.Dispatch<React.SetStateAction<SelectedPlan>>;
