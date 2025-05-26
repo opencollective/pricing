@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   useReactTable,
   getCoreRowModel,
@@ -37,6 +38,8 @@ function calculateBestDefaultTier(collective: Host) {
     usage: {
       expenses: metrics.avgExpensesPerMonth,
       collectives: metrics.avgActiveCollectivesPerMonth,
+      automatedPayouts: collective.automatedPayouts,
+      taxForms: collective.taxForms
     },
   });
 }
@@ -45,7 +48,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 100,
   });
 
   // Calculate summary statistics
@@ -54,6 +57,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
 
     // Initialize all tiers with zero counts and contributions
     const tierCounts: Record<string, number> = {};
+    const freeCounts: Record<string, number> = {};
     const tierContributions: Record<string, number> = {};
     const defaultTiers = newTiers.filter((t) => t.set === "default");
     // Pre-populate with all tiers to preserve order and include zero-count tiers
@@ -61,14 +65,20 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
       tierCounts[tier.title] = 0;
       tierContributions[tier.title] = 0;
     });
+    // Free
+    tierCounts['free'] = 0;
 
     data.forEach((collective) => {
-      const { tier, yearlyCost } = calculateBestDefaultTier(collective);
-      totalIncome += yearlyCost;
+      const { tier, yearlyCost, monthlyCost } = calculateBestDefaultTier(collective);
+      totalIncome += monthlyCost * 12;
 
-      // Count by tier title
-      tierCounts[tier.title]++;
-      tierContributions[tier.title] += yearlyCost;
+      // Count by tier title (separate free)
+      if (monthlyCost === 0) {
+        tierCounts['free'] ++;
+      } else {
+        tierCounts[tier.title]++;
+        tierContributions[tier.title] += monthlyCost * 12;
+      }
     });
 
     return {
@@ -88,13 +98,11 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         cell: (info) => {
           const row = info.row.original;
           return (
-            <a
-              href={`https://opencollective.com/${row.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={`/${row.slug}`}
             >
               {info.getValue() as string}
-            </a>
+            </Link>
           );
         },
         size: 200, // Fixed width in pixels
@@ -159,11 +167,24 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         size: 180, // Fixed width in pixels
       },
       {
-        id: "yearlyCost",
-        header: "Yearly Cost",
+        id: "monthlyCost",
+        header: "Monthly Cost",
         accessorFn: (row) => {
-          const { yearlyCost } = calculateBestDefaultTier(row);
-          return yearlyCost;
+          const { monthlyCost } = calculateBestDefaultTier(row);
+          return monthlyCost;
+        },
+        cell: (info) => {
+          const monthlyCost = info.getValue() as number;
+          return formatAmount(monthlyCost);
+        },
+        size: 180, // Fixed width in pixels
+      },
+      {
+        id: "yearlyCost",
+        header: "Yearly Cost (12 months)",
+        accessorFn: (row) => {
+          const { monthlyCost } = calculateBestDefaultTier(row);
+          return monthlyCost * 12;
         },
         cell: (info) => {
           const yearlyCost = info.getValue() as number;
@@ -194,6 +215,90 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
 
   return (
     <div className="w-full space-y-6 py-6">
+
+      {/* Summary Card */}
+      <div className="bg-white px-6 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3">Summary</h3>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex-1 min-w-[400px]">
+            <div className="overflow-x-auto">
+              <Table className="min-w-full divide-y divide-gray-200">
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Tier
+                    </TableHead>
+                    <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                      Number of hosts
+                    </TableHead>
+                    <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                      Revenue
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="bg-white divide-y divide-gray-100">
+
+                    <TableRow
+                      key="Free"
+                    >
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       Free
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm text-right">
+                       {summary.tierCounts['free']}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm text-right">
+                        {formatAmount(
+                          0
+                        )}
+                      </TableCell>
+                    </TableRow>
+
+                  {defaultTiers.map((tier) => (
+                    <TableRow
+                      key={tier.title}
+                      className={
+                        summary.tierCounts[tier.title] === 0
+                          ? "text-gray-400"
+                          : ""
+                      }
+                    >
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                        {tier.title}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm text-right">
+                        {summary.tierCounts[tier.title]}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm text-right">
+                        {formatAmount(
+                          summary.tierContributions[tier.title] || 0
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter className="bg-gray-50">
+                  <TableRow>
+                    <TableCell className="px-3 py-2 text-sm font-medium">
+                      Total
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium text-right">
+                      {Object.values(summary.tierCounts).reduce(
+                        (sum, count) => sum + count,
+                        0
+                      )}
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium text-right">
+                      {formatAmount(summary.totalIncome)}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Table Card */}
       <div className="py-6 ">
         <h2 className="text-xl font-semibold mb-4 px-6">Hosts</h2>
@@ -293,7 +398,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                 table.setPageSize(Number(e.target.value));
               }}
             >
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {[10, 20, 30, 40, 50, 100].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>
@@ -303,71 +408,6 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
         </div>
       </div>
 
-      {/* Summary Card */}
-      <div className="bg-white px-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">Summary</h3>
-        <div className="flex flex-wrap gap-6">
-          <div className="flex-1 min-w-[400px]">
-            <div className="overflow-x-auto">
-              <Table className="min-w-full divide-y divide-gray-200">
-                <TableHeader className="bg-gray-50">
-                  <TableRow>
-                    <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Tier
-                    </TableHead>
-                    <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                      Number of hosts
-                    </TableHead>
-                    <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                      Revenue
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="bg-white divide-y divide-gray-100">
-                  {defaultTiers.map((tier) => (
-                    <TableRow
-                      key={tier.title}
-                      className={
-                        summary.tierCounts[tier.title] === 0
-                          ? "text-gray-400"
-                          : ""
-                      }
-                    >
-                      <TableCell className="px-3 py-2 text-sm font-medium">
-                        {tier.title}
-                      </TableCell>
-                      <TableCell className="px-3 py-2 text-sm text-right">
-                        {summary.tierCounts[tier.title]}
-                      </TableCell>
-                      <TableCell className="px-3 py-2 text-sm text-right">
-                        {formatAmount(
-                          summary.tierContributions[tier.title] || 0
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter className="bg-gray-50">
-                  <TableRow>
-                    <TableCell className="px-3 py-2 text-sm font-medium">
-                      Total
-                    </TableCell>
-                    <TableCell className="px-3 py-2 text-sm font-medium text-right">
-                      {Object.values(summary.tierCounts).reduce(
-                        (sum, count) => sum + count,
-                        0
-                      )}
-                    </TableCell>
-                    <TableCell className="px-3 py-2 text-sm font-medium text-right">
-                      {formatAmount(summary.totalIncome)}
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

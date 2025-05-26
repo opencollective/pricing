@@ -17,6 +17,8 @@ type PricingContextType = {
   setExpenses: (value: number) => void;
   collectives: number;
   setCollectives: (value: number) => void;
+  automatedPayouts: boolean;
+  setAutomatedPayouts: (value: boolean) => void;
   recommendedTier: NewTier;
   selectedPlan: SelectedPlan;
   setSelectedPlan: React.Dispatch<React.SetStateAction<SelectedPlan>>;
@@ -58,6 +60,8 @@ export function PricingProvider({
   // Manage expense and collective state at the provider level
   const [expenses, setExpenses] = useState<number>(25);
   const [collectives, setCollectives] = useState<number>(0);
+  const [automatedPayouts, setAutomatedPayouts] = useState<boolean>(false);
+  const [taxForms, setTaxForms] = useState<boolean>(false);
 
   // Get the visible tiers
   const tiers = newTiers.filter((t) => t.set === tierSet);
@@ -65,7 +69,7 @@ export function PricingProvider({
   // Calculate the recommended plan based on the current values
   const { tier: recommendedTier } = calculateBestTier({
     tiers,
-    usage: { expenses, collectives },
+    usage: { expenses, collectives, automatedPayouts, taxForms },
   });
 
   // Update selectedTierType when recommendedPlan type changes
@@ -85,6 +89,10 @@ export function PricingProvider({
     setExpenses,
     collectives,
     setCollectives,
+    automatedPayouts,
+    setAutomatedPayouts,
+    taxForms,
+    setTaxForms,
     recommendedTier,
     selectedTierType,
     setSelectedTierType,

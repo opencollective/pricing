@@ -28,6 +28,8 @@ export type Host = {
   totalDisbursedUSD: number;
   totalPlatformTips: number;
   platformTips?: boolean;
+  automatedPayouts: boolean;
+  taxForms: boolean;
   totalHostFeesUSD: number;
   totalHostFeesCrowdfundingUSD: number;
 };
@@ -321,6 +323,28 @@ export async function fetchDataFromDatabase() {
       SELECT h."id", h."slug", h."name", h."type", h."hostFeePercent", h."image",
 
         (h."data"->'plan'->>'platformTips')::boolean AS "platformTips",
+
+        (EXISTS (
+          SELECT 1
+          FROM "Expenses"
+          INNER JOIN "PaymentMethods" pm ON pm."id" = "Expenses"."PaymentMethodId"
+          AND (
+            (pm."service" = 'wise' AND pm."type" = 'bank_transfer')
+            OR
+            (pm."service" = 'paypal' AND pm."type" = 'payout')
+          )
+          WHERE "Expenses"."HostCollectiveId" = h."id"
+          AND "Expenses"."status" = 'PAID'
+          AND "Expenses"."deletedAt" IS NULL
+          AND "Expenses"."createdAt" > ${queryStartDate}
+          AND "Expenses"."createdAt" < ${queryEndDate}
+        ))::boolean AS "automatedPayouts",
+
+        (EXISTS (
+          SELECT 1
+          FROM "RequiredLegalDocuments"
+          WHERE "HostCollectiveId" = h."id"
+        ))::boolean AS "taxForms",
 
         COALESCE((
           SELECT COUNT(DISTINCT c."id")::INTEGER
@@ -645,8 +669,9 @@ export function aggregateEurope(data: Host[]): Host {
 
   return {
     ...europe,
-    slug: "oce",
     name: "Open Collective Europe (aggregate)",
     ...aggregatedData,
+    automatedPayouts: true, // FIXME: to be made dynamic
+    taxForms: true, // FIXME: to be made dynamic
   };
 }
