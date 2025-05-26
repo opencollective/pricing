@@ -57,7 +57,6 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
 
     // Initialize all tiers with zero counts and contributions
     const tierCounts: Record<string, number> = {};
-    const freeCounts: Record<string, number> = {};
     const tierContributions: Record<string, number> = {};
     const defaultTiers = newTiers.filter((t) => t.set === "default");
     // Pre-populate with all tiers to preserve order and include zero-count tiers
@@ -69,7 +68,7 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
     tierCounts['free'] = 0;
 
     data.forEach((collective) => {
-      const { tier, yearlyCost, monthlyCost } = calculateBestDefaultTier(collective);
+      const { tier, monthlyCost } = calculateBestDefaultTier(collective);
       totalIncome += monthlyCost * 12;
 
       // Count by tier title (separate free)

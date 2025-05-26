@@ -73,7 +73,7 @@ export function calculateFees({
   avgExpensesPerMonth - includedExpensesPerMonth
   );
 
-  const extraExpensesForFullYear = afterExtraExpensesPerMonth * 12;
+  // const extraExpensesForFullYear = afterExtraExpensesPerMonth * 12;
 
   // const extraCollectivesForFullYear =
   //   collective.monthlyActiveCollectives?.reduce((total, month) => {
@@ -94,7 +94,7 @@ export function calculateFees({
   avgActiveCollectivesPerMonth - includedCollectives
   );
 
-  const extraCollectivesForFullYear = afterExtraCollectivesPerMonth * 12;
+  // const extraCollectivesForFullYear = afterExtraCollectivesPerMonth * 12;
 
   const platformFeesOnCrowdfunding = platformTips
     ? 0

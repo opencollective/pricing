@@ -16,7 +16,7 @@ async function calculateProjectedRevenue(tierSet: TierSet) {
   let totalPlatformFeesOnCrowdfundingBefore = 0;
   let totalPlatformFeesOnNonCrowdfundingBefore = 0;
   let totalPlatformFeesOnCrowdfunding = 0;
-  let totalPlatformFeesOnNonCrowdfunding = 0;
+  const totalPlatformFeesOnNonCrowdfunding = 0;
   let totalHostPlansBefore = 0;
   let totalHostPlans = 0;
 
