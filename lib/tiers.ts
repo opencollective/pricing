@@ -197,7 +197,7 @@ export const newTiers: NewTier[] = [
     title: "Pro S",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 44900, // $449.00
+      pricePerMonth: 47900, // $479.00
       includedCollectives: 25,
       pricePerAdditionalCollective: 1999, // 19.99
       includedExpensesPerMonth: 250,
@@ -280,7 +280,7 @@ export const newTiers: NewTier[] = [
     title: "Pro",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 44900, // $449.00
+      pricePerMonth: 47900, // $479.00
       includedExpensesPerMonth: 250,
       includedCollectives: 25,
       pricePerAdditionalExpense: 199,
