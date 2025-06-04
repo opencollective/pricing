@@ -35,7 +35,7 @@ export function PricingTierColumn({
     fgColor,
   } = tier;
   const basePrice =
-    interval === PricingInterval.MONTHLY ? pricePerMonth : pricePerMonth * 10;
+    interval === PricingInterval.MONTHLY ? pricePerMonth : pricePerMonth * 11;
 
   // Calculate total price based on usage if provided
   // const totalPrice = expenses || collectives ? calculateTotalPrice() : price;
@@ -64,7 +64,7 @@ export function PricingTierColumn({
     // Return monthly or yearly based on selected interval
     return interval === PricingInterval.MONTHLY
       ? monthlyCost
-      : monthlyCost * 10; // Apply the same yearly discount as the base price
+      : monthlyCost * 11; // Apply the same yearly discount as the base price
   }
 
   const price = showTotalPrice ? calculateTotalPrice() : basePrice;

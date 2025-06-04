@@ -43,7 +43,7 @@ export function calculateFees({
 
   let afterBasePrice = selectedPlan.tier?.pricingModel.pricePerMonth || 0;
   if (selectedPlan.interval === PricingInterval.YEARLY) {
-    afterBasePrice = afterBasePrice * 10;
+    afterBasePrice = afterBasePrice * 11;
   } else {
     afterBasePrice = afterBasePrice * 12;
   }

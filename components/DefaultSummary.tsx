@@ -35,7 +35,7 @@ export function DefaultSummary() {
     extraCollectivesPerMonth * pricePerAdditionalCollective;
 
   if (selectedPlan.interval === PricingInterval.YEARLY) {
-    basePrice = basePrice * 10;
+    basePrice = basePrice * 11;
     extraExpensesAmount = extraExpensesAmount * 12;
     extraCollectivesAmount = extraCollectivesAmount * 12;
   }

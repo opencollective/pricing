@@ -45,7 +45,7 @@ export function calculateBestTier({
 
     // Calculate yearly cost (with crowdfunding fee)
     const yearlyCost =
-      tier.pricingModel.pricePerMonth * 10 +
+      tier.pricingModel.pricePerMonth * 11 +
       (additionalExpensesCost + additionalCollectivesCost) * 12;
 
     return {
