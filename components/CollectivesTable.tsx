@@ -227,6 +227,15 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                     <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                       Tier
                     </TableHead>
+                    <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Base Price
+                    </TableHead>
+                    <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Included Collectives
+                    </TableHead>
+                    <TableHead className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Included Expenses
+                    </TableHead>
                     <TableHead className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
                       Number of hosts
                     </TableHead>
@@ -243,13 +252,20 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                       <TableCell className="px-3 py-2 text-sm font-medium">
                        Free
                       </TableCell>
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       {formatAmount(0)}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       1
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       10
+                      </TableCell>
                       <TableCell className="px-3 py-2 text-sm text-right">
                        {summary.tierCounts['free']}
                       </TableCell>
                       <TableCell className="px-3 py-2 text-sm text-right">
-                        {formatAmount(
-                          0
-                        )}
+                        {formatAmount(0)}
                       </TableCell>
                     </TableRow>
 
@@ -264,6 +280,15 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                     >
                       <TableCell className="px-3 py-2 text-sm font-medium">
                         {tier.title}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       {formatAmount(tier.pricingModel.pricePerMonth)}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       {tier.pricingModel.includedCollectives}
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-sm font-medium">
+                       {tier.pricingModel.includedExpensesPerMonth}
                       </TableCell>
                       <TableCell className="px-3 py-2 text-sm text-right">
                         {summary.tierCounts[tier.title]}
@@ -280,6 +305,15 @@ export function CollectivesTable({ data }: CollectivesTableProps) {
                   <TableRow>
                     <TableCell className="px-3 py-2 text-sm font-medium">
                       Total
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium">
+                      /
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium">
+                      /
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-sm font-medium">
+                      /
                     </TableCell>
                     <TableCell className="px-3 py-2 text-sm font-medium text-right">
                       {Object.values(summary.tierCounts).reduce(
