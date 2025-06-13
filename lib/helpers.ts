@@ -37,11 +37,13 @@ export function calculateFees({
     platformTips,
     totalRaisedCrowdfundingUSD,
     hostFeesNonCrowdfundingUSD,
+    avgActiveCollectivesPerMonth,
+    avgExpensesPerMonth,
   } = calculateMetrics(collective);
 
   let afterBasePrice = selectedPlan.tier?.pricingModel.pricePerMonth || 0;
   if (selectedPlan.interval === PricingInterval.YEARLY) {
-    afterBasePrice = afterBasePrice * 10;
+    afterBasePrice = afterBasePrice * 11;
   } else {
     afterBasePrice = afterBasePrice * 12;
   }
@@ -54,36 +56,45 @@ export function calculateFees({
   // go through each month and see how many extra expenses there are beyond the includedExpensesPerMonth
   // same thing for includedCollectives, but don't use the monthly data, just use the total collectives and compare each months data
 
-  const extraExpensesForFullYear =
-    collective.monthlyExpenses?.reduce((total, month) => {
-      // For each month, calculate how many expenses exceed the included amount
-      const extraExpensesThisMonth = Math.max(
-        0,
-        month.count - includedExpensesPerMonth
-      );
-      return total + extraExpensesThisMonth;
-    }, 0) || 0;
+  // const extraExpensesForFullYear =
+  //   collective.monthlyExpenses?.reduce((total, month) => {
+  //     // For each month, calculate how many expenses exceed the included amount
+  //     const extraExpensesThisMonth = Math.max(
+  //       0,
+  //       month.count - includedExpensesPerMonth
+  //     );
+  //     return total + extraExpensesThisMonth;
+  //   }, 0) || 0;
 
-  const afterExtraExpensesPerMonth = Math.round(extraExpensesForFullYear / 12);
+  // const afterExtraExpensesPerMonth = Math.round(extraExpensesForFullYear / 12);
 
-  const extraCollectivesForFullYear =
-    collective.monthlyActiveCollectives?.reduce((total, month) => {
-      // For each month, calculate how many expenses exceed the included amount
-      const extraCollectivesThisMonth = Math.max(
-        0,
-        month.count - includedCollectives
-      );
-      return total + extraCollectivesThisMonth;
-    }, 0) || 0;
-
-  const afterExtraCollectivesPerMonth = Math.round(
-    extraCollectivesForFullYear / 12
+  const afterExtraExpensesPerMonth = Math.max(
+  0,
+  avgExpensesPerMonth - includedExpensesPerMonth
   );
 
-  // const afterExtraCollectivesPerMonth = Math.max(
-  //   0,
-  //   collective.totalCollectives - includedCollectives
+  // const extraExpensesForFullYear = afterExtraExpensesPerMonth * 12;
+
+  // const extraCollectivesForFullYear =
+  //   collective.monthlyActiveCollectives?.reduce((total, month) => {
+  //     // For each month, calculate how many collectives exceed the included amount
+  //     const extraCollectivesThisMonth = Math.max(
+  //       0,
+  //       month.count - includedCollectives
+  //     );
+  //     return total + extraCollectivesThisMonth;
+  //   }, 0) || 0;
+
+  // const afterExtraCollectivesPerMonth = Math.round(
+  //   extraCollectivesForFullYear / 12
   // );
+
+  const afterExtraCollectivesPerMonth = Math.max(
+  0,
+  avgActiveCollectivesPerMonth - includedCollectives
+  );
+
+  // const extraCollectivesForFullYear = afterExtraCollectivesPerMonth * 12;
 
   const platformFeesOnCrowdfunding = platformTips
     ? 0
@@ -149,6 +160,10 @@ export function calculateFees({
   return {
     before: {
       ...fees.before,
+      totalHostPlans:
+        fees.before.basePrice +
+        fees.before.extraCollectivesAmount +
+        fees.before.extraExpensesAmount,
       total:
         fees.before.platformFeesOnCrowdfunding +
         fees.before.platformFeesOnNonCrowdfunding +
@@ -158,6 +173,10 @@ export function calculateFees({
     },
     after: {
       ...fees.after,
+      totalHostPlans:
+        fees.after.basePrice +
+        fees.after.extraCollectivesAmount +
+        fees.after.extraExpensesAmount,
       total:
         fees.after.platformFeesOnCrowdfunding +
         fees.after.platformFeesOnNonCrowdfunding +

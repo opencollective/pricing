@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
-import { fetchDataFromDatabase, Host } from "@/lib/data";
+import { fetchDataFromDatabase, Host, aggregateEurope } from "@/lib/data";
 
 // Try to load from .env.local first, then fall back to .env
 dotenvConfig({ path: path.resolve(process.cwd(), ".env.local") });
@@ -92,7 +92,13 @@ async function main() {
     }
 
     // Fetch and save Collectives data
-    const collectivesData = await fetchDataFromDatabase();
+    let collectivesData = await fetchDataFromDatabase();
+
+    // OCE aggregation
+    const europe = aggregateEurope(collectivesData);
+    collectivesData = collectivesData.filter(collective => !["europe", "oce-foundation-usd", "oce-foundation-eur"].includes(collective.slug));
+    collectivesData.push(europe);
+
     fs.writeFileSync(
       path.join(dataDir, "collectives.json"),
       JSON.stringify(collectivesData, null, 2)

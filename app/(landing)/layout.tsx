@@ -185,7 +185,7 @@ export default function LandingLayout({
                                   <span className="whitespace-nowrap">
                                     Yearly billing{" "}
                                     <Badge variant="outline" className="ml-2">
-                                      Save 20%
+                                      Save 1 month
                                     </Badge>
                                   </span>
                                 </label>
