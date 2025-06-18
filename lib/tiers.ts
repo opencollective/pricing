@@ -183,7 +183,7 @@ export const newTiers: NewTier[] = [
     title: "Basic L",
     type: TierType.BASIC,
     pricingModel: {
-      pricePerMonth: 24900, // $249.00
+      pricePerMonth: 26900, // $269.00
       includedCollectives: 20,
       pricePerAdditionalCollective: 1499, // $19.99
       includedExpensesPerMonth: 200,
@@ -197,10 +197,10 @@ export const newTiers: NewTier[] = [
     title: "Pro S",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 47900, // $479.00
-      includedCollectives: 25,
+      pricePerMonth: 34900, // $349.00
+      includedCollectives: 20,
       pricePerAdditionalCollective: 1999, // 19.99
-      includedExpensesPerMonth: 250,
+      includedExpensesPerMonth: 200,
       pricePerAdditionalExpense: 199, // $1.99
     },
     features: featuresForPro,
