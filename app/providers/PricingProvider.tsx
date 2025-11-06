@@ -49,7 +49,7 @@ export function PricingProvider({
   children: React.ReactNode;
 }>) {
   const [selectedTierType, setSelectedTierType] = useState<TierType>(
-    TierType.BASIC
+    TierType.FREE
   );
   const [tierSet, setTierSet] = useState<TierSet>("default");
   const [showTotalPrice, setShowTotalPrice] = useState<boolean>(false);
@@ -74,16 +74,21 @@ export function PricingProvider({
     usage: { expenses, collectives, automatedPayouts, taxForms },
   });
 
-  // Update selectedTierType when recommendedPlan type changes
+  // Update selectedPlan tier when recommendedTier changes, but keep the same tier type
   useEffect(() => {
-    if (tierSet === "default" && recommendedTier.type !== selectedTierType) {
-      if (recommendedTier.type) setSelectedTierType(recommendedTier.type);
+    if (tierSet === "default") {
+      // Find the best tier within the currently selected tier type
+      const tiersInCurrentType = tiers.filter((t) => t.type === selectedTierType);
+      const { tier: bestTierInType } = calculateBestTier({
+        tiers: tiersInCurrentType,
+        usage: { expenses, collectives, automatedPayouts, taxForms },
+      });
+      setSelectedPlan((prev) => ({ ...prev, tier: bestTierInType }));
+    } else {
+      setSelectedPlan((prev) => ({ ...prev, tier: recommendedTier }));
     }
-    setSelectedPlan((prev) => ({ ...prev, tier: recommendedTier }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recommendedTier, tierSet]);
-
-  // Calculate the best package for each alternative tier based on usage
+  }, [expenses, collectives, automatedPayouts, taxForms, selectedTierType, tierSet]);
 
   // Create context value
   const contextValue = {
