@@ -2,59 +2,63 @@
 
 import React from "react";
 import { Slider } from "@/components/ui/slider";
-import { newTiers } from "@/lib/tiers";
 import { usePricingContext } from "@/app/providers/PricingProvider";
 
-const defaultTiers = newTiers.filter((t) => t.set === "default");
 export function PlanFinder() {
   const { expenses, collectives, setExpenses, setCollectives } =
     usePricingContext();
-  const expensesValues = [
-    0,
-    ...defaultTiers.map((tier) => tier.pricingModel.includedExpensesPerMonth),
-    50000,
-  ];
-  const collectivesValues = [
-    0,
-    ...defaultTiers.map((tier) => tier.pricingModel.includedCollectives),
-    5000,
-  ];
 
-  // Find the closest index in the predefined values array
-  const findClosestValueIndex = (
-    value: number,
-    valuesArray: number[]
-  ): number => {
+  // Define breakpoints with increasing increments
+  const createScaleBreakpoints = () => {
+    const breakpoints: number[] = [];
+
+    // 0-100: increment by 1
+    for (let i = 0; i <= 100; i += 1) breakpoints.push(i);
+
+    // 100-200: increment by 10
+    for (let i = 110; i <= 200; i += 10) breakpoints.push(i);
+
+    // 200-500: increment by 25
+    for (let i = 225; i <= 500; i += 25) breakpoints.push(i);
+
+    // 500-1000: increment by 50
+    for (let i = 550; i <= 1000; i += 50) breakpoints.push(i);
+
+    // 1000-2000: increment by 100
+    for (let i = 1100; i <= 2000; i += 100) breakpoints.push(i);
+
+    return breakpoints;
+  };
+
+  const breakpoints = createScaleBreakpoints();
+
+  // Convert value to slider position (0-100 scale)
+  const valueToSlider = (value: number) => {
+    if (value === 0) return 0;
+
+    // Find the closest breakpoint
     let closestIndex = 0;
-    let minDiff = Math.abs(valuesArray[0] - value);
+    let minDiff = Math.abs(breakpoints[0] - value);
 
-    for (let i = 1; i < valuesArray.length; i++) {
-      const diff = Math.abs(valuesArray[i] - value);
+    for (let i = 1; i < breakpoints.length; i++) {
+      const diff = Math.abs(breakpoints[i] - value);
       if (diff < minDiff) {
         minDiff = diff;
         closestIndex = i;
       }
     }
 
-    return closestIndex;
+    // Map to 0-100 scale
+    return (closestIndex / (breakpoints.length - 1)) * 100;
   };
 
-  // Convert actual value to slider index
-  const expensesIndex = findClosestValueIndex(expenses, expensesValues);
-  const collectivesIndex = findClosestValueIndex(
-    collectives,
-    collectivesValues
-  );
+  // Convert slider position to actual value
+  const sliderToValue = (sliderPosition: number) => {
+    if (sliderPosition === 0) return 0;
 
-  // Use either controlled or internal setters
-  const handleExpensesChange = (index: number) => {
-    const value = expensesValues[index];
-    setExpenses(value);
-  };
-
-  const handleCollectivesChange = (index: number) => {
-    const value = collectivesValues[index];
-    setCollectives(value);
+    // Map from 0-100 scale to breakpoint index
+    const index = Math.round((sliderPosition / 100) * (breakpoints.length - 1));
+    return breakpoints[Math.min(index, breakpoints.length - 1)];
   };
 
   return (
@@ -70,12 +74,11 @@ export function PlanFinder() {
           <div className="relative pt-2 pb-8">
             <Slider
               id="expenses-slider"
-              defaultValue={[expensesIndex]}
-              value={[expensesIndex]}
+              value={[valueToSlider(expenses)]}
               min={0}
-              max={expensesValues.length - 1}
-              step={1}
-              onValueChange={(values) => handleExpensesChange(values[0])}
+              max={100}
+              step={0.1}
+              onValueChange={(values) => setExpenses(sliderToValue(values[0]))}
               className="w-full"
             />
           </div>
@@ -93,12 +96,11 @@ export function PlanFinder() {
           <div className="relative pt-2 pb-8">
             <Slider
               id="collectives-slider"
-              defaultValue={[collectivesIndex]}
-              value={[collectivesIndex]}
+              value={[valueToSlider(collectives)]}
               min={0}
-              max={collectivesValues.length - 1}
-              step={1}
-              onValueChange={(values) => handleCollectivesChange(values[0])}
+              max={100}
+              step={0.1}
+              onValueChange={(values) => setCollectives(sliderToValue(values[0]))}
               className="w-full"
             />
           </div>

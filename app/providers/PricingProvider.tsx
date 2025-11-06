@@ -60,8 +60,8 @@ export function PricingProvider({
   });
 
   // Manage expense and collective state at the provider level
-  const [expenses, setExpenses] = useState<number>(25);
-  const [collectives, setCollectives] = useState<number>(0);
+  const [expenses, setExpenses] = useState<number>(10);
+  const [collectives, setCollectives] = useState<number>(1);
   const [automatedPayouts, setAutomatedPayouts] = useState<boolean>(false);
   const [taxForms, setTaxForms] = useState<boolean>(false);
 
