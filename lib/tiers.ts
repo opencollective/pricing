@@ -119,35 +119,35 @@ export const newTiers: NewTier[] = [
     pricingModel: {
       pricePerMonth: 0,
       includedCollectives: 1,
-      pricePerAdditionalCollective: 999, // $19.99
+      pricePerAdditionalCollective: 1000, // $19.99
       includedExpensesPerMonth: 10,
-      pricePerAdditionalExpense: 99, // $0.99
+      pricePerAdditionalExpense: 100, // $0.99
     },
     features: featuresForStarter,
   },
-  {
-    set: "default",
-    title: "Discover 3",
-    type: TierType.FREE,
-    pricingModel: {
-      pricePerMonth: 1900,
-      includedCollectives: 3,
-      pricePerAdditionalCollective: 999, // $9.99
-      includedExpensesPerMonth: 30,
-      pricePerAdditionalExpense: 99, // $0.99
-    },
-    features: featuresForStarter,
-  },
+  // {
+  //   set: "default",
+  //   title: "Discover 3",
+  //   type: TierType.FREE,
+  //   pricingModel: {
+  //     pricePerMonth: 1900,
+  //     includedCollectives: 3,
+  //     pricePerAdditionalCollective: 999, // $9.99
+  //     includedExpensesPerMonth: 30,
+  //     pricePerAdditionalExpense: 99, // $0.99
+  //   },
+  //   features: featuresForStarter,
+  // },
   {
     set: "default",
     title: "Discover 5",
     type: TierType.FREE,
     pricingModel: {
-      pricePerMonth: 3900,
+      pricePerMonth: 4000,
       includedCollectives: 5,
-      pricePerAdditionalCollective: 999, // $9.99
+      pricePerAdditionalCollective: 1000, // $9.99
       includedExpensesPerMonth: 50,
-      pricePerAdditionalExpense: 99, // $0.99
+      pricePerAdditionalExpense: 100, // $0.99
     },
     features: featuresForStarter,
   },
@@ -156,11 +156,24 @@ export const newTiers: NewTier[] = [
     title: "Discover 10",
     type: TierType.FREE,
     pricingModel: {
-      pricePerMonth: 8900,
+      pricePerMonth: 8000,
       includedCollectives: 10,
-      pricePerAdditionalCollective: 999, // $9.99
+      pricePerAdditionalCollective: 1000, // $9.99
       includedExpensesPerMonth: 100,
-      pricePerAdditionalExpense: 99, // $0.99
+      pricePerAdditionalExpense: 100, // $0.99
+    },
+    features: featuresForStarter,
+  },
+  {
+    set: "default",
+    title: "Discover 20",
+    type: TierType.FREE,
+    pricingModel: {
+      pricePerMonth: 16000,
+      includedCollectives: 20,
+      pricePerAdditionalCollective: 1000, // $9.99
+      includedExpensesPerMonth: 200,
+      pricePerAdditionalExpense: 100, // $0.99
     },
     features: featuresForStarter,
   },
@@ -170,11 +183,11 @@ export const newTiers: NewTier[] = [
     title: "Basic 5",
     type: TierType.BASIC,
     pricingModel: {
-      pricePerMonth: 4900, // $49.00
+      pricePerMonth: 6000, // $49.00
       includedCollectives: 5,
-      pricePerAdditionalCollective: 1499, // $19.99
+      pricePerAdditionalCollective: 1500, // $19.99
       includedExpensesPerMonth: 50,
-      pricePerAdditionalExpense: 149, // $1.99
+      pricePerAdditionalExpense: 150, // $1.99
     },
     features: featuresForBasic,
   },
@@ -183,11 +196,11 @@ export const newTiers: NewTier[] = [
     title: "Basic 10",
     type: TierType.BASIC,
     pricingModel: {
-      pricePerMonth: 12900, // $129.00
+      pricePerMonth: 12000, // $129.00
       includedCollectives: 10,
-      pricePerAdditionalCollective: 1499, // $19.99
+      pricePerAdditionalCollective: 1500, // $19.99
       includedExpensesPerMonth: 100,
-      pricePerAdditionalExpense: 149, // $1.99
+      pricePerAdditionalExpense: 150, // $1.99
     },
     features: featuresForBasic,
   },
@@ -196,11 +209,11 @@ export const newTiers: NewTier[] = [
     title: "Basic 20",
     type: TierType.BASIC,
     pricingModel: {
-      pricePerMonth: 26900, // $269.00
+      pricePerMonth: 24000, // $269.00
       includedCollectives: 20,
-      pricePerAdditionalCollective: 1499, // $19.99
+      pricePerAdditionalCollective: 1500, // $19.99
       includedExpensesPerMonth: 200,
-      pricePerAdditionalExpense: 149, // $1.99
+      pricePerAdditionalExpense: 150, // $1.99
     },
     features: featuresForBasic,
   },
@@ -209,11 +222,11 @@ export const newTiers: NewTier[] = [
     title: "Basic 50",
     type: TierType.BASIC,
     pricingModel: {
-      pricePerMonth: 64900, // $649.00
+      pricePerMonth: 60000, // $649.00
       includedCollectives: 50,
-      pricePerAdditionalCollective: 1499, // $19.99
+      pricePerAdditionalCollective: 1500, // $19.99
       includedExpensesPerMonth: 500,
-      pricePerAdditionalExpense: 149, // $1.99
+      pricePerAdditionalExpense: 150, // $1.99
     },
     features: featuresForBasic,
   },
@@ -223,11 +236,11 @@ export const newTiers: NewTier[] = [
     title: "Pro 20",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 34900, // $349.00
+      pricePerMonth: 32000, // $349.00
       includedCollectives: 20,
-      pricePerAdditionalCollective: 1999, // 19.99
+      pricePerAdditionalCollective: 2000, // 19.99
       includedExpensesPerMonth: 200,
-      pricePerAdditionalExpense: 199, // $1.99
+      pricePerAdditionalExpense: 200, // $1.99
     },
     features: featuresForPro,
   },
@@ -236,11 +249,11 @@ export const newTiers: NewTier[] = [
     title: "Pro 50",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 89900, // $899.00
+      pricePerMonth: 80000, // $899.00
       includedCollectives: 50,
-      pricePerAdditionalCollective: 1999, // 19.99
+      pricePerAdditionalCollective: 2000, // 19.99
       includedExpensesPerMonth: 500,
-      pricePerAdditionalExpense: 199, // $1.99
+      pricePerAdditionalExpense: 200, // $1.99
     },
     features: featuresForPro,
   },
@@ -249,11 +262,11 @@ export const newTiers: NewTier[] = [
     title: "Pro 100",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 179900, // $1,799.00
+      pricePerMonth: 160000, // $1,799.00
       includedCollectives: 100,
-      pricePerAdditionalCollective: 1999, // 19.99
+      pricePerAdditionalCollective: 2000, // 19.99
       includedExpensesPerMonth: 1000,
-      pricePerAdditionalExpense: 199, // $1.99
+      pricePerAdditionalExpense: 200, // $1.99
     },
     features: featuresForPro,
   },
@@ -262,11 +275,11 @@ export const newTiers: NewTier[] = [
     title: "Pro 200",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 349900, // $3,499.00
+      pricePerMonth: 320000, // $3,499.00
       includedCollectives: 200,
-      pricePerAdditionalCollective: 1999, // 19.99
+      pricePerAdditionalCollective: 2000, // 19.99
       includedExpensesPerMonth: 2000,
-      pricePerAdditionalExpense: 199, // $1.99
+      pricePerAdditionalExpense: 200, // $1.99
     },
     features: featuresForPro,
   },
@@ -292,8 +305,8 @@ export const newTiers: NewTier[] = [
       pricePerMonth: 0,
       includedExpensesPerMonth: 10,
       includedCollectives: 1,
-      pricePerAdditionalExpense: 99,
-      pricePerAdditionalCollective: 999,
+      pricePerAdditionalExpense: 100,
+      pricePerAdditionalCollective: 1000,
     },
     features: featuresForStarter,
     bgColor: "rgb(222, 234, 254)",
@@ -304,11 +317,11 @@ export const newTiers: NewTier[] = [
     title: "Basic",
     type: TierType.BASIC,
     pricingModel: {
-      pricePerMonth: 4900,
+      pricePerMonth: 6000,
       includedExpensesPerMonth: 50,
       includedCollectives: 5,
-      pricePerAdditionalExpense: 149,
-      pricePerAdditionalCollective: 1499,
+      pricePerAdditionalExpense: 150,
+      pricePerAdditionalCollective: 1500,
     },
     features: featuresForBasic,
     bgColor: "rgb(223, 227, 222)",
@@ -319,11 +332,11 @@ export const newTiers: NewTier[] = [
     title: "Pro",
     type: TierType.PRO,
     pricingModel: {
-      pricePerMonth: 47900, // $479.00
-      includedExpensesPerMonth: 250,
-      includedCollectives: 25,
-      pricePerAdditionalExpense: 199,
-      pricePerAdditionalCollective: 1999,
+      pricePerMonth: 32000, // $479.00
+      includedExpensesPerMonth: 200,
+      includedCollectives: 20,
+      pricePerAdditionalExpense: 200,
+      pricePerAdditionalCollective: 2000,
     },
     features: featuresForPro,
     bgColor: "rgb(251, 235, 214)",
