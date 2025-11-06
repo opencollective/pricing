@@ -285,14 +285,14 @@ export const newTiers: NewTier[] = [
   },
   // {
   //   set: "default",
-  //   title: "Pro XXL ",
+  //   title: "Pro 1000",
   //   type: TierType.PRO,
   //   pricingModel: {
-  //     pricePerMonth: 1799900, // $17,999.00
+  //     pricePerMonth: 1600000, // $17,999.00
   //     includedCollectives: 1000,
-  //     pricePerAdditionalCollective: 1999, // 19.99
+  //     pricePerAdditionalCollective: 2000, // 19.99
   //     includedExpensesPerMonth: 10000,
-  //     pricePerAdditionalExpense: 199, // $1.99
+  //     pricePerAdditionalExpense: 200, // $1.99
   //   },
   //   features: featuresForPro,
   // },
