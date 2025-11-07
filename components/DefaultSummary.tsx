@@ -3,6 +3,9 @@
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { usePricingContext } from "@/app/providers/PricingProvider";
 import { formatAmount } from "@/lib/helpers";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { PricingInterval } from "@/lib/types/Tier";
 
 /**
@@ -11,6 +14,8 @@ import { PricingInterval } from "@/lib/types/Tier";
  */
 export function DefaultSummary() {
   const { expenses, collectives, selectedPlan } = usePricingContext();
+  const [isOpen, setIsOpen] = useState(true);
+
   if (!selectedPlan.tier) {
     return null;
   }
@@ -43,60 +48,95 @@ export function DefaultSummary() {
   const total = basePrice + extraExpensesAmount + extraCollectivesAmount;
   return (
     <div>
-      <h4 className="text-lg font-semibold mb-2 px-2">Summary</h4>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">
-              Base Price
-              <div className="text-xs text-muted-foreground mt-1">
-                {selectedPlan.tier.title}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full mb-4 cursor-pointer hover:opacity-80 transition-opacity"
+      >
+        <h4 className="text-lg font-semibold">Summary</h4>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ChevronDown className="h-5 w-5" />
+        </motion.span>
+      </button>
+
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">
+                  Base Price
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {selectedPlan.tier.title}
+                  </div>
+                </TableCell>
+                {}
+                <TableCell className="text-right">
+                  {formatAmount(basePrice)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Extra Expenses</TableCell>
+                <TableCell className="text-right">
+                  {formatAmount(extraExpensesAmount, 2)}
+                  {extraExpensesPerMonth > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {extraExpensesPerMonth} x{" "}
+                      {formatAmount(pricePerAdditionalExpense, 2)}{" "}
+                      {selectedPlan.interval === PricingInterval.YEARLY && (
+                        <>x 12</>
+                      )}
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Extra Collectives</TableCell>
+                <TableCell className="text-right">
+                  {formatAmount(extraCollectivesAmount)}
+                  {extraCollectivesPerMonth > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {extraCollectivesPerMonth} x{" "}
+                      {formatAmount(pricePerAdditionalCollective, 2)}{" "}
+                      {selectedPlan.interval === PricingInterval.YEARLY && (
+                        <>x 12</>
+                      )}
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+
+          {/* Total - Make it BIG and prominent */}
+          <div className="mt-6 pt-6 border-t-2 border-primary/20">
+            <div className="bg-primary/10 rounded-xl p-6 text-center">
+              <div className="text-sm font-medium text-muted-foreground mb-2">
+                Total{" "}
+                {selectedPlan.interval === PricingInterval.MONTHLY
+                  ? "Monthly"
+                  : "Yearly"}{" "}
+                Cost
               </div>
-            </TableCell>
-            {}
-            <TableCell className="text-right">
-              {formatAmount(basePrice)}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Extra Expenses</TableCell>
-            <TableCell className="text-right">
-              {formatAmount(extraExpensesAmount, 2)}
-              {extraExpensesPerMonth > 0 && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  {extraExpensesPerMonth} x{" "}
-                  {formatAmount(pricePerAdditionalExpense, 2)}{" "}
-                  {selectedPlan.interval === PricingInterval.YEARLY && (
-                    <>x 12</>
-                  )}
+              <div className="text-5xl font-bold text-primary mb-1">
+                {formatAmount(total, 0)}
+              </div>
+              {selectedPlan.interval === PricingInterval.YEARLY && (
+                <div className="text-sm text-muted-foreground">
+                  {formatAmount(total / 11, 0)}/month
                 </div>
               )}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Extra Collectives</TableCell>
-            <TableCell className="text-right">
-              {formatAmount(extraCollectivesAmount)}
-              {extraCollectivesPerMonth > 0 && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  {extraCollectivesPerMonth} x{" "}
-                  {formatAmount(pricePerAdditionalCollective, 2)}{" "}
-                  {selectedPlan.interval === PricingInterval.YEARLY && (
-                    <>x 12</>
-                  )}
-                </div>
-              )}
-            </TableCell>
-          </TableRow>
-          <TableRow className="border-t-2">
-            <TableCell className="font-semibold text-base">Total</TableCell>
-            <TableCell className="font-semibold text-right text-base">
-              {formatAmount(total, 0)}/
-              {selectedPlan.interval === PricingInterval.MONTHLY ? "mo" : "yr"}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
