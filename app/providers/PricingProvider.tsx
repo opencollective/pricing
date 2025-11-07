@@ -65,25 +65,26 @@ export function PricingProvider({
   const [automatedPayouts, setAutomatedPayouts] = useState<boolean>(false);
   const [taxForms, setTaxForms] = useState<boolean>(false);
 
-  // Get the visible tiers
+  // Get the visible tiers - filter by tier set AND tier type
   const tiers = newTiers.filter((t) => t.set === tierSet);
 
-  // Calculate the recommended plan based on the current values
+  // Filter tiers to only the selected tier type for recommendation
+  const tiersForRecommendation =
+    tierSet === "default"
+      ? tiers.filter((t) => t.type === selectedTierType)
+      : tiers;
+
+  // Calculate the recommended plan ONLY within the selected tier type
   const { tier: recommendedTier } = calculateBestTier({
-    tiers,
+    tiers: tiersForRecommendation,
     usage: { expenses, collectives, automatedPayouts, taxForms },
   });
 
-  // Update selectedTierType when recommendedPlan type changes
+  // Update selectedPlan when recommendedTier changes, but don't change selectedTierType
   useEffect(() => {
-    if (tierSet === "default" && recommendedTier.type !== selectedTierType) {
-      if (recommendedTier.type) setSelectedTierType(recommendedTier.type);
-    }
     setSelectedPlan((prev) => ({ ...prev, tier: recommendedTier }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recommendedTier, tierSet]);
-
-  // Calculate the best package for each alternative tier based on usage
 
   // Create context value
   const contextValue = {
