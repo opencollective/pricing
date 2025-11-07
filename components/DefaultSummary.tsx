@@ -115,21 +115,24 @@ export function DefaultSummary() {
             </TableBody>
           </Table>
 
-          {/* Total - Make it BIG and prominent */}
-          <div className="mt-6 pt-6 border-t-2 border-primary/20">
-            <div className="bg-primary/10 rounded-xl p-6 text-center">
+          {/* Total - Make it prominent */}
+          <div className="mt-2">
+            <div className="bg-primary/10 rounded-xl p-4 text-center">
               <div className="text-sm font-medium text-muted-foreground mb-2">
-                Total{" "}
-                {selectedPlan.interval === PricingInterval.MONTHLY
-                  ? "Monthly"
-                  : "Yearly"}{" "}
-                Cost
+                Total Cost
               </div>
-              <div className="text-5xl font-bold text-primary mb-1">
-                {formatAmount(total, 0)}
+              <div className="flex items-baseline justify-center gap-x-2">
+                <span className="text-2xl font-bold text-primary">
+                  {formatAmount(total, 0)}
+                </span>
+                <span className="text-xl font-semibold text-primary">
+                  {selectedPlan.interval === PricingInterval.MONTHLY
+                    ? "/month"
+                    : "/year"}
+                </span>
               </div>
               {selectedPlan.interval === PricingInterval.YEARLY && (
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground mt-2">
                   {formatAmount(total / 11, 0)}/month
                 </div>
               )}

@@ -75,7 +75,7 @@ export default function LandingLayout({
 
   return (
     <>
-      <div className="min-h-screen py-10">
+      <div className="min-h-screen pt-20">
         <div className="px-12">
           {/* Summary at the top - will be positioned fixed via inline styles */}
           <div
@@ -119,7 +119,7 @@ export default function LandingLayout({
                         selectedTierType === TierType.FREE
                           ? "bg-white shadow-md"
                           : "text-gray-500"
-                      } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                      } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out cursor-pointer`}
                       onClick={() => setSelectedTierType(TierType.FREE)}
                     >
                       Starter
@@ -130,7 +130,7 @@ export default function LandingLayout({
                         selectedTierType === TierType.BASIC
                           ? "bg-white shadow-md"
                           : "text-gray-500"
-                      } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                      } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out cursor-pointer`}
                       onClick={() => setSelectedTierType(TierType.BASIC)}
                     >
                       Basic
@@ -141,7 +141,7 @@ export default function LandingLayout({
                         selectedTierType === TierType.PRO
                           ? "bg-white shadow-md"
                           : "text-gray-500"
-                      } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
+                      } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out cursor-pointer`}
                       onClick={() => setSelectedTierType(TierType.PRO)}
                     >
                       Pro

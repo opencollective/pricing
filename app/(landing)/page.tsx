@@ -15,8 +15,8 @@ export default async function LandingPage() {
         className="bg-muted/75 rounded-2xl p-6 pt-8 shadow-lg"
         style={{ 
           position: 'fixed',
-          top: '2rem',
-          right: '2rem',
+          top: '1rem',
+          right: '1rem',
           width: '550px',
           maxHeight: 'calc(50vh - 80px)',
           overflow: 'auto',
@@ -31,8 +31,8 @@ export default async function LandingPage() {
         className="bg-muted/75 rounded-2xl p-6 pt-8 shadow-lg"
         style={{ 
           position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
+          bottom: '1rem',
+          right: '1rem',
           width: '550px',
           maxHeight: 'calc(50vh - 80px)',
           overflow: 'auto',
