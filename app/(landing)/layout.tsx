@@ -73,23 +73,33 @@ export default function LandingLayout({
   return (
     <>
       <div className="min-h-screen pt-20">
-        <div className="mx-auto max-w-4xl text-center mb-20">
-          <h1 className="text-base font-semibold leading-7 text-primary">
-            Pricing Simulator
-          </h1>
-          <p className="mt-2 text-4xl font-bold text-balance tracking-tight text-gray-900 sm:text-5xl">
-            Help Us Shape Our New Pricing Model
-          </p>
-          <p className="mt-6 text-balance text-lg leading-8 text-gray-600">
-            We&apos;re exploring a new business model to ensure long-term
-            sustainability. Your feedback on these pricing options is needed as
-            we work together to create a fair and transparent funding model.
-          </p>
-        </div>
-        <div className="flex gap-12 justify-center px-12">
+        <div className="px-12">
+          {/* Summary at the top - will be positioned fixed via inline styles */}
+          <div
+            className="mb-12"
+            style={{
+              position: "fixed",
+              top: "100px",
+              right: "2rem",
+              width: "550px",
+              maxHeight: "calc(100vh - 120px)",
+              overflow: "auto",
+              zIndex: 40,
+            }}
+          >
+            {children}
+          </div>
+
           {/* Main content area */}
-          <div className="flex-1 max-w-7xl">
-            <div className="max-w-3xl mx-auto mt-16">
+          <div className="w-full max-w-7xl" style={{ marginRight: "590px" }}>
+            {/* Pricing Simulator title at the very top */}
+            <div className="text-center mb-8">
+              <h1 className="text-base font-semibold leading-7 text-primary">
+                Pricing Simulator
+              </h1>
+            </div>
+
+            <div className="mt-16">
               <PlanFinder />
             </div>
             <div className="py-0">
@@ -382,17 +392,6 @@ export default function LandingLayout({
               </RadioGroup>
 
               <div className="mt-20 text-center">
-                <p className="text-sm leading-6 text-gray-500">
-                  These are proposed models for feedback only. Please{" "}
-                  <a
-                    href="#"
-                    className="font-semibold text-primary-600 hover:text-primary/80"
-                  >
-                    share your thoughts with us
-                  </a>
-                  .
-                </p>
-
                 <div className="mt-8 mb-12">
                   <Link
                     href="/list"
@@ -405,9 +404,6 @@ export default function LandingLayout({
             </div>
             <PricingSimulatorConfig />
           </div>
-
-          {/* Sticky card with children content */}
-          <div className="max-w-[650px] flex-1">{children}</div>
         </div>
       </div>
     </>

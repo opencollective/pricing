@@ -7,13 +7,38 @@ import FinancialOutcomeWrapper from "@/components/FinancialOutcomeWrapper";
  */
 export default async function LandingPage() {
   return (
-    <div className="space-y-12">
-      <div className="bg-muted/75 rounded-2xl p-6 pt-8">
+    <>
+      {/* Summary - fixed from top */}
+      <div 
+        className="bg-muted/75 rounded-2xl p-6 pt-8 shadow-lg"
+        style={{ 
+          position: 'fixed',
+          top: '100px',
+          right: '2rem',
+          width: '550px',
+          maxHeight: 'calc(50vh - 80px)',
+          overflow: 'auto',
+          zIndex: 40
+        }}
+      >
         <DefaultSummary />
       </div>
-      <div className="bg-muted/75 rounded-2xl p-6 pt-8">
+      
+      {/* Business Model Outcome - fixed from bottom */}
+      <div 
+        className="bg-muted/75 rounded-2xl p-6 pt-8 shadow-lg"
+        style={{ 
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          width: '550px',
+          maxHeight: 'calc(50vh - 80px)',
+          overflow: 'auto',
+          zIndex: 40
+        }}
+      >
         <FinancialOutcomeWrapper />
       </div>
-    </div>
+    </>
   );
 }
