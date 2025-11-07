@@ -80,7 +80,7 @@ export function PricingTierColumn({
   };
 
   return (
-    <th className={`px-3 pt-4 min-w-[250px]`}>
+    <th className={`px-3 pt-4 min-w-[210px]`}>
       <div
         className={`relative w-full h-full px-5 pt-5 pb-4 rounded-2xl transition-colors ${
           bgColor ? `` : `${isHovered ? "bg-gray-50" : "bg-white"} border`

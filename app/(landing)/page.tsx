@@ -18,7 +18,6 @@ export default async function LandingPage() {
           top: '1rem',
           right: '1rem',
           width: '550px',
-          maxHeight: 'calc(50vh - 80px)',
           overflow: 'auto',
           zIndex: 40
         }}

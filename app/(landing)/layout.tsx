@@ -75,26 +75,26 @@ export default function LandingLayout({
 
   return (
     <>
-      <div className="min-h-screen pt-20">
+      <div className="min-h-screen pt-10">
         <div className="px-12">
           {/* Summary at the top - will be positioned fixed via inline styles */}
           <div
-            className="mb-12"
-            style={{
-              position: "fixed",
-              top: "100px",
-              right: "2rem",
-              width: "550px",
-              maxHeight: "calc(100vh - 120px)",
-              overflow: "auto",
-              zIndex: 40,
-            }}
+            // className="mb-12"
+            // style={{
+            //   position: "fixed",
+            //   top: "100px",
+            //   right: "2rem",
+            //   width: "550px",
+            //   maxHeight: "calc(100vh - 120px)",
+            //   overflow: "auto",
+            //   zIndex: 40,
+            // }}
           >
             {children}
           </div>
 
           {/* Main content area */}
-          <div className="w-full max-w-7xl" style={{ marginRight: "590px" }}>
+          <div className="w-full max-w-5xl" >
             {/* Pricing Simulator title at the very top */}
             <div className="text-center mb-8">
               <h1 className="text-base font-semibold leading-7 text-primary">
