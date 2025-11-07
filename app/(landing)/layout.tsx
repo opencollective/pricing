@@ -109,7 +109,7 @@ export default function LandingLayout({
                       } relative rounded-full py-2 px-6 text-sm font-medium whitespace-nowrap focus:outline-none transition-all duration-200 ease-in-out`}
                       onClick={() => setSelectedTierType(TierType.FREE)}
                     >
-                      Discover
+                      Starter
                     </button>
                     <button
                       type="button"

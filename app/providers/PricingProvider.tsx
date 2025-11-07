@@ -49,7 +49,7 @@ export function PricingProvider({
   children: React.ReactNode;
 }>) {
   const [selectedTierType, setSelectedTierType] = useState<TierType>(
-    TierType.FREE
+    TierType.BASIC
   );
   const [tierSet, setTierSet] = useState<TierSet>("default");
   const [showTotalPrice, setShowTotalPrice] = useState<boolean>(false);
@@ -60,8 +60,8 @@ export function PricingProvider({
   });
 
   // Manage expense and collective state at the provider level
-  const [expenses, setExpenses] = useState<number>(10);
-  const [collectives, setCollectives] = useState<number>(1);
+  const [expenses, setExpenses] = useState<number>(25);
+  const [collectives, setCollectives] = useState<number>(0);
   const [automatedPayouts, setAutomatedPayouts] = useState<boolean>(false);
   const [taxForms, setTaxForms] = useState<boolean>(false);
 
@@ -74,21 +74,16 @@ export function PricingProvider({
     usage: { expenses, collectives, automatedPayouts, taxForms },
   });
 
-  // Update selectedPlan tier when recommendedTier changes, but keep the same tier type
+  // Update selectedTierType when recommendedPlan type changes
   useEffect(() => {
-    if (tierSet === "default") {
-      // Find the best tier within the currently selected tier type
-      const tiersInCurrentType = tiers.filter((t) => t.type === selectedTierType);
-      const { tier: bestTierInType } = calculateBestTier({
-        tiers: tiersInCurrentType,
-        usage: { expenses, collectives, automatedPayouts, taxForms },
-      });
-      setSelectedPlan((prev) => ({ ...prev, tier: bestTierInType }));
-    } else {
-      setSelectedPlan((prev) => ({ ...prev, tier: recommendedTier }));
+    if (tierSet === "default" && recommendedTier.type !== selectedTierType) {
+      if (recommendedTier.type) setSelectedTierType(recommendedTier.type);
     }
+    setSelectedPlan((prev) => ({ ...prev, tier: recommendedTier }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expenses, collectives, automatedPayouts, taxForms, selectedTierType, tierSet]);
+  }, [recommendedTier, tierSet]);
+
+  // Calculate the best package for each alternative tier based on usage
 
   // Create context value
   const contextValue = {
