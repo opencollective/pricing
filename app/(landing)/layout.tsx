@@ -14,6 +14,9 @@ import PricingSimulatorConfig from "../../components/PricingSimulatorConfig";
 import { PlanFinder } from "@/components/PlanFinder";
 import { usePricingContext } from "../providers/PricingProvider";
 
+const SHOW_PRICING_SIMULATOR_CONFIG = false;
+const SHOW_VIEW_DATA = false;
+
 // Animated table row component using Framer Motion
 function AnimatedTableRow({
   show,
@@ -72,7 +75,7 @@ export default function LandingLayout({
 
   return (
     <>
-      <div className="min-h-screen pt-20">
+      <div className="min-h-screen py-10">
         <div className="px-12">
           {/* Summary at the top - will be positioned fixed via inline styles */}
           <div
@@ -391,7 +394,7 @@ export default function LandingLayout({
                 </div>
               </RadioGroup>
 
-              <div className="mt-20 text-center">
+              {SHOW_VIEW_DATA && <div className="mt-20 text-center">
                 <div className="mt-8 mb-12">
                   <Link
                     href="/list"
@@ -400,9 +403,9 @@ export default function LandingLayout({
                     View Data
                   </Link>
                 </div>
-              </div>
+              </div>}
             </div>
-            <PricingSimulatorConfig />
+            {SHOW_PRICING_SIMULATOR_CONFIG && <PricingSimulatorConfig />}
           </div>
         </div>
       </div>
