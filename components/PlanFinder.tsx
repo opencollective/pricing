@@ -65,13 +65,12 @@ export function PlanFinder() {
     <div className="">
       <div className="space-y-8">
         <div>
-          <div className="flex justify-between mb-2">
+          <div className="mb-2">
             <label htmlFor="expenses-slider" className="font-medium">
               How many expenses per month will you pay?
             </label>
-            <span className="text-gray-600">{expenses} expenses per month</span>
           </div>
-          <div className="relative pt-2 pb-8">
+          <div className="relative pt-2 pb-2">
             <Slider
               id="expenses-slider"
               value={[valueToSlider(expenses)]}
@@ -82,18 +81,18 @@ export function PlanFinder() {
               className="w-full"
             />
           </div>
+          <div className="text-sm text-gray-600 mt-2">
+            {expenses} expenses per month
+          </div>
         </div>
 
         <div>
-          <div className="flex justify-between mb-2">
-            <label htmlFor="collectives-slider" className="font-medium ">
+          <div className="mb-2">
+            <label htmlFor="collectives-slider" className="font-medium">
               Will you host other collectives?
             </label>
-            <span className="text-gray-600">
-              {collectives} hosted collectives
-            </span>
           </div>
-          <div className="relative pt-2 pb-8">
+          <div className="relative pt-2 pb-2">
             <Slider
               id="collectives-slider"
               value={[valueToSlider(collectives)]}
@@ -103,6 +102,9 @@ export function PlanFinder() {
               onValueChange={(values) => setCollectives(sliderToValue(values[0]))}
               className="w-full"
             />
+          </div>
+          <div className="text-sm text-gray-600 mt-2">
+            {collectives} hosted collectives
           </div>
         </div>
       </div>
