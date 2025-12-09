@@ -1,19 +1,45 @@
 import { DefaultSummary } from "@/components/DefaultSummary";
 import FinancialOutcomeWrapper from "@/components/FinancialOutcomeWrapper";
 
+const SHOW_BUSINESS_MODEL_OUTCOME = false;
+
 /**
  * Page component for the landing page that contains just the plan finder sliders
  * It uses the PricingContext to connect with the layout
  */
 export default async function LandingPage() {
   return (
-    <div className="space-y-12">
-      <div className="bg-muted/75 rounded-2xl p-6 pt-8">
+    <>
+      {/* Summary - fixed from top */}
+      <div 
+        className="bg-muted/75 rounded-2xl p-6 pt-8 shadow-lg"
+        style={{ 
+          position: 'fixed',
+          top: '1rem',
+          right: '1rem',
+          width: '550px',
+          overflow: 'auto',
+          zIndex: 40
+        }}
+      >
         <DefaultSummary />
       </div>
-      <div className="bg-muted/75 rounded-2xl p-6 pt-8">
+      
+      {/* Business Model Outcome - fixed from bottom */}
+      {SHOW_BUSINESS_MODEL_OUTCOME && <div
+        className="bg-muted/75 rounded-2xl p-6 pt-8 shadow-lg"
+        style={{ 
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          width: '550px',
+          maxHeight: 'calc(50vh - 80px)',
+          overflow: 'auto',
+          zIndex: 40
+        }}
+      >
         <FinancialOutcomeWrapper />
-      </div>
-    </div>
+      </div>}
+    </>
   );
 }

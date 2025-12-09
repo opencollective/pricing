@@ -80,7 +80,7 @@ export function PricingTierColumn({
   };
 
   return (
-    <th className={`px-3 pt-4 min-w-[250px]`}>
+    <th className={`px-3 pt-4 min-w-[210px]`}>
       <div
         className={`relative w-full h-full px-5 pt-5 pb-4 rounded-2xl transition-colors ${
           bgColor ? `` : `${isHovered ? "bg-gray-50" : "bg-white"} border`
@@ -107,13 +107,13 @@ export function PricingTierColumn({
         )}
         <div className={`text-left ${isRecommended ? "relative z-10" : ""}`}>
           <div className="flex items-center justify-between">
-            <h3 className={`text-2xl font-semibold`}>{title}</h3>
+            <h3 className={`text-xl font-semibold`}>{title}</h3>
             {/* <CircleIcon className="fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2" /> */}
             <RadioGroupItem className="bg-white" value={title} ref={radioRef} />
           </div>
 
           <div className="mt-2 flex items-baseline justify-start gap-x-1">
-            <span className={`text-4xl font-bold tracking-tight`}>
+            <span className={`text-2xl font-bold tracking-tight`}>
               {formatAmount(price, 0)}
             </span>
             <span
@@ -121,7 +121,7 @@ export function PricingTierColumn({
                 fgColor ? "" : "text-gray-600"
               }`}
             >
-              {interval === PricingInterval.MONTHLY ? "/mo" : "/yr"}
+              {interval === PricingInterval.MONTHLY ? "/month" : "/year"}
             </span>
           </div>
           {!showTotalPrice && (
